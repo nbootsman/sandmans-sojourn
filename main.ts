@@ -3,6 +3,7 @@ namespace SpriteKind {
     export const SleepingEnemy = SpriteKind.create()
     export const TempSprite = SpriteKind.create()
     export const Ammo = SpriteKind.create()
+    export const Door = SpriteKind.create()
 }
 namespace StatusBarKind {
     export const Environment = StatusBarKind.create()
@@ -71,6 +72,11 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         dropHourglass()
     }
 })
+scene.onOverlapTile(SpriteKind.Player, tiles.util.door0, function (sprite, location) {
+    if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door0)) {
+        player_sprite.say("UP to Enter", 200)
+    }
+})
 sprites.onCreated(SpriteKind.Food, function (sprite) {
     sprite.setImage(assets.image`pickup_health`)
     sprite.ay = 100
@@ -107,6 +113,17 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
     status.spriteAttachedTo().destroy()
     status.destroy()
 })
+function startGame () {
+    connectRooms()
+    tiles.loadMap(list_Rooms[0])
+    tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
+    tiles.replaceAllTiles(tiles.util.object7, assets.tile`transparency16`)
+    player_sprite.setPosition(player_sprite.x + tiles.tileWidth(), player_sprite.y)
+}
+function connectRooms () {
+    list_Rooms = [tiles.createMap(tilemap`level_1`), tiles.createMap(tilemap`level0`)]
+    tiles.connectMapById(list_Rooms[0], list_Rooms[1], ConnectionKind.Door1)
+}
 function fillHourglass () {
     if (payCost(cost_fillHourglass)) {
         tiles.replaceAllTiles(assets.tile`hourglass-top0`, assets.tile`hourglass-top`)
@@ -156,6 +173,11 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
         )
     }
 })
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Door, function (sprite, otherSprite) {
+    if (tiles.locationXY(tiles.locationOfSprite(sprite), tiles.XY.row) == tiles.locationXY(tiles.locationOfSprite(otherSprite), tiles.XY.row) && tiles.locationXY(tiles.locationOfSprite(sprite), tiles.XY.column) == tiles.locationXY(tiles.locationOfSprite(otherSprite), tiles.XY.column)) {
+        player_sprite.say("UP to Enter", 200)
+    }
+})
 controller.right.onEvent(ControllerButtonEvent.Released, function () {
     if (cutscene_isPlaying) {
     	
@@ -177,9 +199,8 @@ scene.onHitWall(SpriteKind.Construct, function (sprite, location) {
     }
 })
 tiles.onMapLoaded(function (tilemap2) {
-    tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
-    player_sprite.setPosition(player_sprite.x + tiles.tileWidth(), player_sprite.y)
-    tiles.replaceAllTiles(tiles.util.object7, assets.tile`sandVortex`)
+    tiles.coverAllTiles(tiles.util.door0, sprites.dungeon.doorOpenNorth)
+    tiles.replaceAllTiles(tiles.util.object13, assets.tile`sandVortex`)
     tiles.createSpritesOnTiles(tiles.util.object8, SpriteKind.Ammo)
     tiles.replaceAllTiles(tiles.util.object8, assets.tile`transparency16`)
     tiles.createSpritesOnTiles(tiles.util.object10, SpriteKind.Food)
@@ -222,6 +243,11 @@ tiles.onMapUnloaded(function (tilemap2) {
     tiles.destroySpritesOfKind(SpriteKind.Construct)
     tiles.destroySpritesOfKind(SpriteKind.Projectile)
     tiles.destroySpritesOfKind(SpriteKind.Enemy)
+    tiles.destroySpritesOfKind(SpriteKind.Food)
+    tiles.destroySpritesOfKind(SpriteKind.Ammo)
+    tiles.destroySpritesOfKind(SpriteKind.TempSprite)
+    tiles.destroySpritesOfKind(SpriteKind.SleepingEnemy)
+    tiles.destroySpritesOfKind(SpriteKind.Door)
 })
 controller.up.onEvent(ControllerButtonEvent.Released, function () {
     if (cutscene_isPlaying) {
@@ -320,9 +346,6 @@ sprites.onCreated(SpriteKind.Ammo, function (sprite) {
         `)
     sprite.ay = 100
 })
-function startLevel () {
-    tiles.loadMap(tiles.createMap(tilemap`level0`))
-}
 function updateTimers () {
     status_bar_list = statusbars.allOfKind(StatusBarKind.Energy)
     for (let value4 of status_bar_list) {
@@ -339,13 +362,14 @@ function updateTimers () {
 }
 function getCanJump () {
     if (player_sprite.isHittingTile(CollisionDirection.Bottom)) {
-        player_canJump = true
+        return true
     } else {
         for (let value7 of sprites.allOfKind(SpriteKind.Construct)) {
             if (player_sprite.overlapsWith(value7)) {
-                player_canJump = true
+                return true
             }
         }
+        return false
     }
 }
 scene.onOverlapTile(SpriteKind.Player, assets.tile`hourglass-bottom1`, function (sprite, location) {
@@ -371,7 +395,7 @@ function dropHourglass () {
 }
 scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.doorOpenNorth, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, sprites.dungeon.doorOpenNorth)) {
-        player_sprite.say("UP to Enter", 200)
+        player_sprite.say("UP to Escape!", 200)
     }
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
@@ -387,14 +411,16 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`sandVortex`, function (sprite
     }
 })
 function upContextAction () {
-    if (player_sprite.tileKindAt(TileDirection.Center, sprites.dungeon.doorOpenNorth)) {
-        game.over(true, effects.confetti)
+    if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door0)) {
+        tiles.loadConnectedMap(ConnectionKind.Door1)
+        tiles.placeOnRandomTile(player_sprite, tiles.util.door0)
         return true
     } else if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`sandVortex`)) {
         info.setScore(Math.max(player_sandMax, info.score()))
         return true
-    } else if (false) {
-    	
+    } else if (player_sprite.tileKindAt(TileDirection.Center, sprites.dungeon.doorOpenNorth)) {
+        game.over(true, effects.confetti)
+        return true
     } else {
         return false
     }
@@ -409,6 +435,7 @@ let status_bar_list: StatusBarSprite[] = []
 let flipStatusbar: StatusBarSprite = null
 let statusbar3: StatusBarSprite = null
 let tempSprite: Sprite = null
+let list_Rooms: tiles.WorldMap[] = []
 let sand: Sprite = null
 let projectile: Sprite = null
 let player_canJump = false
@@ -461,13 +488,13 @@ player_sprite = sprites.create(img`
     . . . f f f f f f f f f f . . . 
     . . . . f f . . . f f f . . . . 
     `, SpriteKind.Player)
-startLevel()
+startGame()
 player_gravity = 300
 player_sprite.ay = player_gravity
 controller.moveSprite(player_sprite, 50, 0)
 scene.cameraFollowSprite(player_sprite)
 game.onUpdate(function () {
-    getCanJump()
+    player_canJump = getCanJump()
 })
 game.onUpdateInterval(duration_tickRate, function () {
     updateTimers()

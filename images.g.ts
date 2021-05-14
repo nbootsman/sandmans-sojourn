@@ -3,41 +3,6 @@ namespace myImages {
 
     helpers._registerFactory("image", function(name: string) {
         switch(helpers.stringTrim(name)) {
-            case "vEMq}P,KEjC6{B~/:RD0":
-            case "hourglass":return img`
-.......bbbbbbbbb
-......bddddddddd
-.....bdddddddddd
-....bddddddddddd
-...bdddddddddddd
-..bddddddddddddd
-..c1111111111111
-..c1111111111111
-.bcccccccccccccc
-bb11111dd11dbbbb
-c11bbcc11dd11dbb
-c1bbddbcb11dd111
-c1bbbddbdbd11ddd
-c11bbddcddbbd111
-cb1111dcbd11bbbb
-.cb111ccbdd11111
-..cccc.cbdbb1bb1
-.......cbdbb1db1
-.......cbdbd1dd1
-.......cbdbd1dd1
-......ccbdbd1dd1
-.....cbbbdbd1dd1
-.....cdbbdbd1dd1
-.....c11bbbd1dd1
-.....cd111bbbbbb
-....cccd11111111
-...cbddbbb111111
-..cbddddddbbbbbb
-..c1111111111111
-..c1111111111111
-..c1111111111111
-..cbbbbbbbbbbbbb
-`;
             case "4T]Ib%C`c+VNLQkW4FH~":
             case "sand":return img`
 e 4 
