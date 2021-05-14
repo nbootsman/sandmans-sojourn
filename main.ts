@@ -9,61 +9,11 @@ namespace StatusBarKind {
 }
 sprites.onCreated(SpriteKind.Enemy, function (sprite) {
     if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow4)) {
-        sprite.setImage(img`
-            ........................
-            ........................
-            ........................
-            ..........ffff..........
-            ........ff1111ff........
-            .......fb111111bf.......
-            .......f1111111dbf......
-            ......fd1111111ddf......
-            ......fd111111dddf......
-            ......fd111ddddddf......
-            ......fd111ddddddf......
-            ......fd1dddddddbf......
-            ......fd1dfbddbbff......
-            ......fbddfcdbbcf.......
-            .....ffffccddbfff.......
-            ....fcb1bbbfcffff.......
-            ....f1b1dcffffffff......
-            ....fdfdf..ffffffffff...
-            .....f.f.....ffffff.....
-            ........................
-            ........................
-            ........................
-            ........................
-            ........................
-            `)
+        sprite.setImage(assets.image`enemy_ghost`)
         sprite.vx = -50
         sprite.setBounceOnWall(true)
     } else if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow5)) {
-        sprite.setImage(img`
-            ........................
-            ........................
-            ........................
-            ........................
-            ..........fffff.........
-            ........ff1111bff.......
-            .......fb1111111bf......
-            .......f111111111f......
-            ......fd1111111ffff.....
-            ......fd111dd1c111bf....
-            ......fb11fcdf1b1bff....
-            ......f11111bfbfbff.....
-            ......f1b1bdfcffff......
-            ......fbfbfcfcccf.......
-            ......ffffffffff........
-            .........ffffff.........
-            .........ffffff.........
-            .........fffffff..f.....
-            ..........fffffffff.....
-            ...........fffffff......
-            ........................
-            ........................
-            ........................
-            ........................
-            `)
+        sprite.setImage(assets.image`enemy_ghost2`)
         sprite.vy = 50
         sprite.setBounceOnWall(true)
     } else {
@@ -71,10 +21,10 @@ sprites.onCreated(SpriteKind.Enemy, function (sprite) {
     }
 })
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (player_sprite.tileKindAt(TileDirection.Center, sprites.dungeon.doorOpenNorth)) {
-        game.over(true, effects.confetti)
-    } else if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`sandVortex`)) {
-        info.setScore(Math.max(player_sandMax, info.score()))
+    if (cutscene_isPlaying) {
+    	
+    } else if (upContextAction()) {
+    	
     } else if (player_canJump) {
         player_sprite.vy = -85
         player_sprite.ay = -10
@@ -90,7 +40,9 @@ sprites.onDestroyed(SpriteKind.Construct, function (sprite) {
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     timer.throttle("throwSand", 500, function () {
-        if (payCost(cost_throwSand)) {
+        if (cutscene_isPlaying) {
+        	
+        } else if (payCost(cost_throwSand)) {
             for (let index = 0; index < 5; index++) {
                 projectile = sprites.createProjectileFromSprite(assets.image`sand`, player_sprite, randint(60, 80) * player_facing, randint(0, -20))
                 projectile.ay = 100
@@ -104,27 +56,21 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`hourglass-top0`, function (sp
     }
 })
 controller.up.onEvent(ControllerButtonEvent.Repeated, function () {
-    player_sprite.ay = player_gravity
+    if (cutscene_isPlaying) {
+    	
+    } else {
+        player_sprite.ay = player_gravity
+    }
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`hourglass-bottom1`) || player_sprite.tileKindAt(TileDirection.Center, assets.tile`hourglass-top0`)) {
+    if (cutscene_isPlaying) {
+    	
+    } else if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`hourglass-bottom1`) || player_sprite.tileKindAt(TileDirection.Center, assets.tile`hourglass-top0`)) {
         fillHourglass()
     } else {
         dropHourglass()
     }
 })
-function setAnimation () {
-    if (true) {
-    	
-    }
-    if (player_facing == 1) {
-    	
-    } else if (player_facing == -1) {
-    	
-    } else {
-    	
-    }
-}
 sprites.onCreated(SpriteKind.Food, function (sprite) {
     sprite.setImage(assets.image`pickup_health`)
     sprite.ay = 100
@@ -198,19 +144,31 @@ function fillHourglass () {
     statusbar3.value = duration_hourglass / duration_tickRate
 }
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    player_facing = -1
-    animation.runImageAnimation(
-    player_sprite,
-    assets.animation`sandman_walkLeft`,
-    200,
-    true
-    )
+    if (cutscene_isPlaying) {
+    	
+    } else {
+        player_facing = -1
+        animation.runImageAnimation(
+        player_sprite,
+        assets.animation`sandman_walkLeft`,
+        200,
+        true
+        )
+    }
 })
 controller.right.onEvent(ControllerButtonEvent.Released, function () {
-    animation.stopAnimation(animation.AnimationTypes.ImageAnimation, player_sprite)
+    if (cutscene_isPlaying) {
+    	
+    } else {
+        animation.stopAnimation(animation.AnimationTypes.ImageAnimation, player_sprite)
+    }
 })
 controller.left.onEvent(ControllerButtonEvent.Released, function () {
-    animation.stopAnimation(animation.AnimationTypes.ImageAnimation, player_sprite)
+    if (cutscene_isPlaying) {
+    	
+    } else {
+        animation.stopAnimation(animation.AnimationTypes.ImageAnimation, player_sprite)
+    }
 })
 scene.onHitWall(SpriteKind.Construct, function (sprite, location) {
     if (sprite.isHittingTile(CollisionDirection.Bottom)) {
@@ -235,6 +193,7 @@ tiles.onMapLoaded(function (tilemap2) {
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Ammo, function (sprite, otherSprite) {
     otherSprite.destroy(effects.warmRadial, 500)
     info.changeScoreBy(1)
+    info.setScore(Math.min(info.score(), player_sandMax))
 })
 function takeDamage () {
     timer.throttle("action", duration_damageImmunity, function () {
@@ -247,13 +206,17 @@ statusbars.onZero(StatusBarKind.Magic, function (status) {
     status.destroy()
 })
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    player_facing = 1
-    animation.runImageAnimation(
-    player_sprite,
-    assets.animation`sandman_walkRight`,
-    200,
-    true
-    )
+    if (cutscene_isPlaying) {
+    	
+    } else {
+        player_facing = 1
+        animation.runImageAnimation(
+        player_sprite,
+        assets.animation`sandman_walkRight`,
+        200,
+        true
+        )
+    }
 })
 tiles.onMapUnloaded(function (tilemap2) {
     tiles.destroySpritesOfKind(SpriteKind.Construct)
@@ -261,16 +224,25 @@ tiles.onMapUnloaded(function (tilemap2) {
     tiles.destroySpritesOfKind(SpriteKind.Enemy)
 })
 controller.up.onEvent(ControllerButtonEvent.Released, function () {
+    if (cutscene_isPlaying) {
+    	
+    } else {
+    	
+    }
     player_sprite.ay = player_gravity
 })
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    for (let value3 of sprites.allOfKind(SpriteKind.Construct)) {
-        if (value3.image.equals(assets.image`hourglass_broken`)) {
-            continue;
+    if (cutscene_isPlaying) {
+    	
+    } else {
+        for (let value3 of sprites.allOfKind(SpriteKind.Construct)) {
+            if (value3.image.equals(assets.image`hourglass_broken`)) {
+                continue;
+            }
+            flipStatusbar = statusbars.getStatusBarAttachedTo(StatusBarKind.Energy, value3)
+            flipStatusbar.value = flipStatusbar.max - flipStatusbar.value
+            value3.setImage(assets.image`hourglass_broken`)
         }
-        flipStatusbar = statusbars.getStatusBarAttachedTo(StatusBarKind.Energy, value3)
-        flipStatusbar.value = flipStatusbar.max - flipStatusbar.value
-        value3.setImage(assets.image`hourglass_broken`)
     }
 })
 info.onLifeZero(function () {
@@ -349,7 +321,7 @@ sprites.onCreated(SpriteKind.Ammo, function (sprite) {
     sprite.ay = 100
 })
 function startLevel () {
-    tiles.loadMap(tiles.createMap(tilemap`level1`))
+    tiles.loadMap(tiles.createMap(tilemap`level0`))
 }
 function updateTimers () {
     status_bar_list = statusbars.allOfKind(StatusBarKind.Energy)
@@ -414,6 +386,19 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`sandVortex`, function (sprite
         player_sprite.say("UP to Get Sand", 200)
     }
 })
+function upContextAction () {
+    if (player_sprite.tileKindAt(TileDirection.Center, sprites.dungeon.doorOpenNorth)) {
+        game.over(true, effects.confetti)
+        return true
+    } else if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`sandVortex`)) {
+        info.setScore(Math.max(player_sandMax, info.score()))
+        return true
+    } else if (false) {
+    	
+    } else {
+        return false
+    }
+}
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     takeDamage()
 })
@@ -427,6 +412,8 @@ let tempSprite: Sprite = null
 let sand: Sprite = null
 let projectile: Sprite = null
 let player_canJump = false
+let player_gravity = 0
+let player_sprite: Sprite = null
 let player_lifeMax = 0
 let player_sandMax = 0
 let cost_makeHourglass = 0
@@ -437,10 +424,25 @@ let duration_damageImmunity = 0
 let duration_sleep = 0
 let duration_hourglass = 0
 let player_facing = 0
-let player_gravity = 0
-let player_sprite: Sprite = null
+let cutscene_isPlaying = false
 game.splash("Sandman's Sojourn")
+game.showLongText("Use Left and Right buttons to move and Up to jump", DialogLayout.Center)
+game.showLongText("Press B to Throw Sand to put enemies to sleep", DialogLayout.Center)
+game.showLongText("You only have so much Sand but more can be collected from Vortexes", DialogLayout.Center)
+cutscene_isPlaying = false
 scene.setBackgroundColor(12)
+player_facing = 1
+duration_hourglass = 5000
+duration_sleep = 2500
+duration_damageImmunity = 1000
+duration_tickRate = 500
+cost_throwSand = 1
+cost_fillHourglass = 2
+cost_makeHourglass = 3
+player_sandMax = 10
+player_lifeMax = 3
+info.setScore(player_sandMax)
+info.setLife(player_lifeMax)
 player_sprite = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     . . . . . f f f f f f . . . . . 
@@ -464,21 +466,8 @@ player_gravity = 300
 player_sprite.ay = player_gravity
 controller.moveSprite(player_sprite, 50, 0)
 scene.cameraFollowSprite(player_sprite)
-player_facing = 1
-duration_hourglass = 5000
-duration_sleep = 2500
-duration_damageImmunity = 1000
-duration_tickRate = 500
-cost_throwSand = 1
-cost_fillHourglass = 2
-cost_makeHourglass = 3
-player_sandMax = 10
-player_lifeMax = 3
-info.setScore(player_sandMax)
-info.setLife(player_lifeMax)
 game.onUpdate(function () {
     getCanJump()
-    setAnimation()
 })
 game.onUpdateInterval(duration_tickRate, function () {
     updateTimers()
