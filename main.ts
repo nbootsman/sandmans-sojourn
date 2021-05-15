@@ -17,6 +17,10 @@ sprites.onCreated(SpriteKind.Enemy, function (sprite) {
         sprite.setImage(assets.image`enemy_ghost2`)
         sprite.vy = 50
         sprite.setBounceOnWall(true)
+    } else if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow0)) {
+        sprite.setImage(assets.image`enemy_ghost2`)
+        sprite.vy = -50
+        sprite.setBounceOnWall(true)
     } else {
     	
     }
@@ -45,7 +49,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         	
         } else if (payCost(cost_throwSand)) {
             for (let index = 0; index < 5; index++) {
-                projectile = sprites.createProjectileFromSprite(assets.image`sand`, player_sprite, randint(60, 80) * player_facing, randint(0, -20))
+                projectile = sprites.createProjectileFromSprite(assets.image`sand`, player_sprite, randint(80, 100) * player_facing, randint(0, -20))
                 projectile.ay = 100
             }
         }
@@ -111,10 +115,15 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
             `, SpriteKind.Ammo)
         sand.setPosition(status.spriteAttachedTo().x + index2, status.spriteAttachedTo().y)
     }
+    list = tiles.getTilesByType(sprites.dungeon.floorLight2)
     for (let value of tiles.getTilesByType(sprites.dungeon.floorDarkDiamond)) {
         tiles.setWallAt(value, true)
     }
     tiles.replaceAllTiles(sprites.dungeon.floorDarkDiamond, sprites.dungeon.floorLight2)
+    for (let value2 of list) {
+        tiles.setWallAt(value2, false)
+        tiles.setTileAt(value2, sprites.dungeon.floorDarkDiamond)
+    }
     music.bigCrash.play()
     status.spriteAttachedTo().destroy()
     status.destroy()
@@ -127,18 +136,26 @@ function startGame () {
 }
 function connectRooms () {
     list_Rooms = [tiles.createMap(tilemap`level_1`)]
+    list_Rooms.push(tiles.createMap(tilemap`level_2`))
+    list_Rooms.push(tiles.createMap(tilemap`level_3`))
     list_Rooms.push(tiles.createMap(tilemap`level0`))
     tiles.connectMapById(list_Rooms[0], list_Rooms[1], ConnectionKind.Door1)
+    tiles.connectMapById(list_Rooms[1], list_Rooms[2], ConnectionKind.Door2)
 }
 function fillHourglass () {
     if (payCost(cost_fillHourglass)) {
         tiles.replaceAllTiles(assets.tile`hourglass-top0`, assets.tile`hourglass-top`)
         tiles.replaceAllTiles(assets.tile`hourglass-bottom1`, assets.tile`hourglass-bottom0`)
     }
+    list = tiles.getTilesByType(sprites.dungeon.floorDarkDiamond)
     for (let value2 of tiles.getTilesByType(sprites.dungeon.floorLight2)) {
         tiles.setWallAt(value2, false)
     }
     tiles.replaceAllTiles(sprites.dungeon.floorLight2, sprites.dungeon.floorDarkDiamond)
+    for (let value2 of list) {
+        tiles.setWallAt(value2, true)
+        tiles.setTileAt(value2, sprites.dungeon.floorLight2)
+    }
     music.smallCrash.play()
     tempSprite = sprites.create(img`
         . . . . . . . . . . . . . . . . 
@@ -187,14 +204,14 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Door, function (sprite, otherSpr
 controller.right.onEvent(ControllerButtonEvent.Released, function () {
     if (cutscene_isPlaying) {
     	
-    } else {
+    } else if (!(controller.left.isPressed())) {
         animation.stopAnimation(animation.AnimationTypes.ImageAnimation, player_sprite)
     }
 })
 controller.left.onEvent(ControllerButtonEvent.Released, function () {
     if (cutscene_isPlaying) {
     	
-    } else {
+    } else if (!(controller.right.isPressed())) {
         animation.stopAnimation(animation.AnimationTypes.ImageAnimation, player_sprite)
     }
 })
@@ -207,16 +224,18 @@ scene.onHitWall(SpriteKind.Construct, function (sprite, location) {
 tiles.onMapLoaded(function (tilemap2) {
     tiles.replaceAllTiles(tiles.util.object7, assets.tile`transparency16`)
     tiles.coverAllTiles(tiles.util.door0, sprites.dungeon.doorOpenNorth)
+    tiles.coverAllTiles(tiles.util.door2, sprites.dungeon.doorOpenNorth)
     tiles.replaceAllTiles(tiles.util.object13, assets.tile`sandVortex`)
     tiles.createSpritesOnTiles(tiles.util.object8, SpriteKind.Ammo)
     tiles.replaceAllTiles(tiles.util.object8, assets.tile`transparency16`)
     tiles.createSpritesOnTiles(tiles.util.object10, SpriteKind.Food)
     tiles.replaceAllTiles(tiles.util.object10, assets.tile`transparency16`)
-    tiles.replaceAllTiles(sprites.dungeon.floorDarkDiamond, assets.tile`transparency16`)
     tiles.createSpritesOnTiles(tiles.util.arrow4, SpriteKind.Enemy)
     tiles.replaceAllTiles(tiles.util.arrow4, assets.tile`transparency16`)
     tiles.createSpritesOnTiles(tiles.util.arrow5, SpriteKind.Enemy)
     tiles.replaceAllTiles(tiles.util.arrow5, assets.tile`transparency16`)
+    tiles.createSpritesOnTiles(tiles.util.arrow0, SpriteKind.Enemy)
+    tiles.replaceAllTiles(tiles.util.arrow0, assets.tile`transparency16`)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Ammo, function (sprite, otherSprite) {
     otherSprite.destroy(effects.warmRadial, 500)
@@ -285,6 +304,11 @@ tiles.onMapUnloaded(function (tilemap2) {
     tiles.destroySpritesOfKind(SpriteKind.TempSprite)
     tiles.destroySpritesOfKind(SpriteKind.SleepingEnemy)
     tiles.destroySpritesOfKind(SpriteKind.Door)
+})
+scene.onOverlapTile(SpriteKind.Player, tiles.util.door2, function (sprite, location) {
+    if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door2)) {
+        player_sprite.say("UP to Enter", 200)
+    }
 })
 controller.up.onEvent(ControllerButtonEvent.Released, function () {
     if (cutscene_isPlaying) {
@@ -448,15 +472,19 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`sandVortex`, function (sprite
     }
 })
 function upContextAction () {
-    if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door0)) {
-        tiles.loadConnectedMap(ConnectionKind.Door1)
-        tiles.placeOnRandomTile(player_sprite, tiles.util.door0)
-        return true
-    } else if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`sandVortex`)) {
+    if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`sandVortex`)) {
         info.setScore(Math.max(player_sandMax, info.score()))
         return true
     } else if (player_sprite.tileKindAt(TileDirection.Center, sprites.dungeon.doorOpenNorth)) {
         game.over(true, effects.confetti)
+        return true
+    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door0)) {
+        tiles.loadConnectedMap(ConnectionKind.Door1)
+        tiles.placeOnRandomTile(player_sprite, tiles.util.door0)
+        return true
+    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door2)) {
+        tiles.loadConnectedMap(ConnectionKind.Door2)
+        tiles.placeOnRandomTile(player_sprite, tiles.util.door2)
         return true
     } else {
         return false
@@ -473,6 +501,7 @@ let flipStatusbar: StatusBarSprite = null
 let statusbar3: StatusBarSprite = null
 let tempSprite: Sprite = null
 let list_Rooms: tiles.WorldMap[] = []
+let list: tiles.Location[] = []
 let sand: Sprite = null
 let player_respawnY = 0
 let player_respawnX = 0
