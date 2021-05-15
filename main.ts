@@ -117,11 +117,11 @@ function startGame () {
     connectRooms()
     tiles.loadMap(list_Rooms[0])
     tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
-    tiles.replaceAllTiles(tiles.util.object7, assets.tile`transparency16`)
     player_sprite.setPosition(player_sprite.x + tiles.tileWidth(), player_sprite.y)
 }
 function connectRooms () {
-    list_Rooms = [tiles.createMap(tilemap`level_1`), tiles.createMap(tilemap`level0`)]
+    list_Rooms = [tiles.createMap(tilemap`level_1`)]
+    list_Rooms.push(tiles.createMap(tilemap`level0`))
     tiles.connectMapById(list_Rooms[0], list_Rooms[1], ConnectionKind.Door1)
 }
 function fillHourglass () {
@@ -199,6 +199,7 @@ scene.onHitWall(SpriteKind.Construct, function (sprite, location) {
     }
 })
 tiles.onMapLoaded(function (tilemap2) {
+    tiles.replaceAllTiles(tiles.util.object7, assets.tile`transparency16`)
     tiles.coverAllTiles(tiles.util.door0, sprites.dungeon.doorOpenNorth)
     tiles.replaceAllTiles(tiles.util.object13, assets.tile`sandVortex`)
     tiles.createSpritesOnTiles(tiles.util.object8, SpriteKind.Ammo)
@@ -226,6 +227,11 @@ function takeDamage () {
 statusbars.onZero(StatusBarKind.Magic, function (status) {
     status.destroy()
 })
+function getHasFallen () {
+    if (tiles.locationXY(tiles.locationOfSprite(player_sprite), tiles.XY.row) >= tiles.tilemapRows() - 1) {
+        takeDamage()
+    }
+}
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cutscene_isPlaying) {
     	
@@ -468,7 +474,7 @@ cost_fillHourglass = 2
 cost_makeHourglass = 3
 player_sandMax = 10
 player_lifeMax = 3
-info.setScore(player_sandMax)
+info.setScore(0)
 info.setLife(player_lifeMax)
 player_sprite = sprites.create(img`
     . . . . . . . . . . . . . . . . 
