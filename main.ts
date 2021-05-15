@@ -56,6 +56,12 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`hourglass-top0`, function (sp
         sprite.say("A to Fill", 200)
     }
 })
+scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile`, function (sprite, location) {
+    if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`myTile`)) {
+        player_respawnX = player_sprite.x
+        player_respawnY = player_sprite.y
+    }
+})
 controller.up.onEvent(ControllerButtonEvent.Repeated, function () {
     if (cutscene_isPlaying) {
     	
@@ -229,7 +235,32 @@ statusbars.onZero(StatusBarKind.Magic, function (status) {
 })
 function getHasFallen () {
     if (tiles.locationXY(tiles.locationOfSprite(player_sprite), tiles.XY.row) >= tiles.tilemapRows() - 1) {
-        takeDamage()
+        if (!(cutscene_isPlaying)) {
+            takeDamage()
+            cutscene_isPlaying = true
+            if (player_facing == -1) {
+                animation.runImageAnimation(
+                player_sprite,
+                assets.animation`player_fallingLeft`,
+                100,
+                false
+                )
+            } else {
+                animation.runImageAnimation(
+                player_sprite,
+                assets.animation`player_fallingRight`,
+                100,
+                false
+                )
+                timer.after(500, function () {
+                    animation.stopAnimation(animation.AnimationTypes.All, player_sprite)
+                    player_sprite.setImage(assets.image`sandman`)
+                    player_sprite.setVelocity(0, 0)
+                    player_sprite.setPosition(player_respawnX, player_respawnY)
+                    cutscene_isPlaying = false
+                })
+            }
+        }
     }
 }
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -443,6 +474,8 @@ let statusbar3: StatusBarSprite = null
 let tempSprite: Sprite = null
 let list_Rooms: tiles.WorldMap[] = []
 let sand: Sprite = null
+let player_respawnY = 0
+let player_respawnX = 0
 let projectile: Sprite = null
 let player_canJump = false
 let player_gravity = 0
@@ -501,6 +534,7 @@ controller.moveSprite(player_sprite, 50, 0)
 scene.cameraFollowSprite(player_sprite)
 game.onUpdate(function () {
     player_canJump = getCanJump()
+    getHasFallen()
 })
 game.onUpdateInterval(duration_tickRate, function () {
     updateTimers()

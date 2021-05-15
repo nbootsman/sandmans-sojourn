@@ -14,6 +14,8 @@ namespace myTiles {
     export const tile2 = image.ofBuffer(hex``);
     //% fixedInstance jres blockIdentity=images._tile
     export const tile3 = image.ofBuffer(hex``);
+    //% fixedInstance jres blockIdentity=images._tile
+    export const tile7 = image.ofBuffer(hex``);
 
     helpers._registerFactory("tilemap", function(name: string) {
         switch(helpers.stringTrim(name)) {
@@ -67,7 +69,7 @@ namespace myTiles {
 2222222222222222222222222222222222222222
 `, [myTiles.transparency16,sprites.dungeon.darkGroundNorth,sprites.dungeon.floorDark1,myTiles.tile5,myTiles.tile6,tiles.util.object7,tiles.util.arrow4,sprites.dungeon.darkGroundSouthEast1,sprites.dungeon.darkGroundWest,sprites.dungeon.darkGroundNorthWest0,sprites.dungeon.darkGroundNorthEast0,tiles.util.object8,sprites.dungeon.floorLight0,tiles.util.arrow5,sprites.dungeon.doorOpenNorth,sprites.dungeon.floorLight2,sprites.dungeon.floorDarkDiamond,tiles.util.object10,tiles.util.object13,tiles.util.door0], TileScale.Sixteen);
             case "level_1":
-            case "level2":return tiles.createTilemap(hex`28000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000900000000000000000000000000000000000000000000000000000003010700000202020000000202020200000000000000000000000000000200000000000002000000040608000000000000000000000000000a000000000002000000000000020000000000000200000004060800000000000000000000000001010101010101010101010101010101010101010101010101050608000000000000000000000000`, img`
+            case "level2":return tiles.createTilemap(hex`2800080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b000000000000000000000900000000000000000000000000000000000000000000000000000003010700000202020000000202020200000000000000000000000000000200000000000002000000040608000000000000000000000000000a000000000002000000000000020000000000000200000004060800000000000000000000000001010101010101010101010101010101010101010101010101050608000000000000000000000000`, img`
 ........................................
 ........................................
 ........................................
@@ -76,7 +78,7 @@ namespace myTiles {
 ..............2......2...222............
 .......2......2......2...222............
 2222222222222222222222222222............
-`, [myTiles.transparency16,sprites.dungeon.darkGroundNorth,sprites.dungeon.floorLight0,sprites.dungeon.darkGroundNorthWest0,sprites.dungeon.darkGroundWest,sprites.dungeon.darkGroundSouthEast1,sprites.dungeon.darkGroundCenter,sprites.dungeon.darkGroundNorthEast0,sprites.dungeon.darkGroundEast,tiles.util.door0,tiles.util.object7], TileScale.Sixteen);
+`, [myTiles.transparency16,sprites.dungeon.darkGroundNorth,sprites.dungeon.floorLight0,sprites.dungeon.darkGroundNorthWest0,sprites.dungeon.darkGroundWest,sprites.dungeon.darkGroundSouthEast1,sprites.dungeon.darkGroundCenter,sprites.dungeon.darkGroundNorthEast0,sprites.dungeon.darkGroundEast,tiles.util.door0,tiles.util.object7,myTiles.tile7], TileScale.Sixteen);
         }
         return null;
     })
@@ -96,6 +98,8 @@ namespace myTiles {
             case "tile2":return tile2;
             case "helpSign":
             case "tile3":return tile3;
+            case "myTile":
+            case "tile7":return tile7;
         }
         return null;
     })
