@@ -8,6 +8,11 @@ namespace SpriteKind {
 namespace StatusBarKind {
     export const Environment = StatusBarKind.create()
 }
+scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, location) {
+    if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`myTile0`)) {
+        sprite.say("UP to Pickup", 200)
+    }
+})
 sprites.onCreated(SpriteKind.Enemy, function (sprite) {
     if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow4)) {
         sprite.setImage(assets.image`enemy_ghost`)
@@ -30,6 +35,8 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     	
     } else if (upContextAction()) {
     	
+    } else if (upDoorAction()) {
+    	
     } else if (player_canJump) {
         player_sprite.vy = -85
         player_sprite.ay = -10
@@ -49,7 +56,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         	
         } else if (payCost(cost_throwSand)) {
             for (let index = 0; index < 5; index++) {
-                projectile = sprites.createProjectileFromSprite(assets.image`sand`, player_sprite, randint(80, 100) * player_facing, randint(0, -20))
+                projectile = sprites.createProjectileFromSprite(assets.image`sand`, player_sprite, randint(100, 120) * player_facing, randint(0, -20))
                 projectile.ay = 100
             }
         }
@@ -57,7 +64,9 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`hourglass-top0`, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`hourglass-top0`)) {
-        sprite.say("A to Fill", 200)
+        if (upgrade_fillHourglass) {
+            sprite.say("A to Fill", 200)
+        }
     }
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile`, function (sprite, location) {
@@ -143,45 +152,45 @@ function connectRooms () {
     tiles.connectMapById(list_Rooms[1], list_Rooms[2], ConnectionKind.Door2)
 }
 function fillHourglass () {
-    if (payCost(cost_fillHourglass)) {
+    if (upgrade_fillHourglass && payCost(cost_fillHourglass)) {
         tiles.replaceAllTiles(assets.tile`hourglass-top0`, assets.tile`hourglass-top`)
         tiles.replaceAllTiles(assets.tile`hourglass-bottom1`, assets.tile`hourglass-bottom0`)
+        list = tiles.getTilesByType(sprites.dungeon.floorDarkDiamond)
+        for (let value2 of tiles.getTilesByType(sprites.dungeon.floorLight2)) {
+            tiles.setWallAt(value2, false)
+        }
+        tiles.replaceAllTiles(sprites.dungeon.floorLight2, sprites.dungeon.floorDarkDiamond)
+        for (let value2 of list) {
+            tiles.setWallAt(value2, true)
+            tiles.setTileAt(value2, sprites.dungeon.floorLight2)
+        }
+        music.smallCrash.play()
+        tempSprite = sprites.create(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, SpriteKind.TempSprite)
+        tempSprite.setPosition(tiles.locationXY(tiles.locationOfSprite(player_sprite), tiles.XY.x), tiles.locationXY(tiles.locationOfSprite(player_sprite), tiles.XY.y))
+        statusbar3 = statusbars.create(4, 32, StatusBarKind.Environment)
+        statusbar3.attachToSprite(tempSprite, 0, -8)
+        statusbar3.setColor(5, 4)
+        statusbar3.positionDirection(CollisionDirection.Left)
+        statusbar3.max = duration_hourglass / duration_tickRate
+        statusbar3.value = duration_hourglass / duration_tickRate
     }
-    list = tiles.getTilesByType(sprites.dungeon.floorDarkDiamond)
-    for (let value2 of tiles.getTilesByType(sprites.dungeon.floorLight2)) {
-        tiles.setWallAt(value2, false)
-    }
-    tiles.replaceAllTiles(sprites.dungeon.floorLight2, sprites.dungeon.floorDarkDiamond)
-    for (let value2 of list) {
-        tiles.setWallAt(value2, true)
-        tiles.setTileAt(value2, sprites.dungeon.floorLight2)
-    }
-    music.smallCrash.play()
-    tempSprite = sprites.create(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `, SpriteKind.TempSprite)
-    tempSprite.setPosition(tiles.locationXY(tiles.locationOfSprite(player_sprite), tiles.XY.x), tiles.locationXY(tiles.locationOfSprite(player_sprite), tiles.XY.y))
-    statusbar3 = statusbars.create(4, 32, StatusBarKind.Environment)
-    statusbar3.attachToSprite(tempSprite, 0, -8)
-    statusbar3.setColor(5, 4)
-    statusbar3.positionDirection(CollisionDirection.Left)
-    statusbar3.max = duration_hourglass / duration_tickRate
-    statusbar3.value = duration_hourglass / duration_tickRate
 }
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cutscene_isPlaying) {
@@ -280,6 +289,22 @@ function getHasFallen () {
                 })
             }
         }
+    }
+}
+function upDoorAction () {
+    if (player_sprite.tileKindAt(TileDirection.Center, sprites.dungeon.doorOpenNorth)) {
+        game.over(true, effects.confetti)
+        return true
+    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door0)) {
+        tiles.loadConnectedMap(ConnectionKind.Door1)
+        tiles.placeOnRandomTile(player_sprite, tiles.util.door0)
+        return true
+    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door2)) {
+        tiles.loadConnectedMap(ConnectionKind.Door2)
+        tiles.placeOnRandomTile(player_sprite, tiles.util.door2)
+        return true
+    } else {
+        return false
     }
 }
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -435,12 +460,15 @@ function getCanJump () {
 }
 scene.onOverlapTile(SpriteKind.Player, assets.tile`hourglass-bottom1`, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`hourglass-bottom1`)) {
-        sprite.say("A to Fill", 200)
+        if (upgrade_fillHourglass) {
+            sprite.say("A to Fill", 200)
+        }
     }
 })
 function dropHourglass () {
     timer.throttle("dropHourglass", 1000, function () {
-        if (payCost(cost_makeHourglass)) {
+        let upgrade_makeHourglasas = 0
+        if (upgrade_makeHourglasas && payCost(cost_makeHourglass)) {
             hourglass = sprites.create(assets.image`hourglass_filled`, SpriteKind.Construct)
             hourglass.setPosition(player_sprite.x, player_sprite.top)
             hourglass.setVelocity(50 * player_facing, -50)
@@ -468,24 +496,32 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`sandVortex`, function (sprite, location) {
     if (sprite.tileKindAt(TileDirection.Center, assets.tile`sandVortex`)) {
-        player_sprite.say("UP to Get Sand", 200)
+        player_sprite.say("UP to Gather", 200)
     }
 })
 function upContextAction () {
     if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`sandVortex`)) {
+        if (!(upgrade_firstSand)) {
+            game.showLongText("Press B to Throw Sand to put enemies to sleep", DialogLayout.Top)
+            game.showLongText("How much Sand you have is shown in the top right corner", DialogLayout.Top)
+            game.showLongText("Sand can be picked from piles or refilled at the Sand Vortexes", DialogLayout.Top)
+            upgrade_firstSand = true
+        }
         info.setScore(Math.max(player_sandMax, info.score()))
         return true
-    } else if (player_sprite.tileKindAt(TileDirection.Center, sprites.dungeon.doorOpenNorth)) {
-        game.over(true, effects.confetti)
+    } else if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`myTile0`)) {
+        upgrade_fillHourglass = true
+        tiles.replaceAllTiles(assets.tile`myTile0`, assets.tile`transparency16`)
+        game.showLongText("Cosmic Funnel - Converts the Sands of Sleep to the Sands of Time", DialogLayout.Top)
+        game.showLongText("Press A when standing near an Hourglass to fill it and temporarily change the dream around you", DialogLayout.Top)
+        game.showLongText("It costs 2 Sand to fill an Hourglass which will be returned when it runs out", DialogLayout.Bottom)
         return true
-    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door0)) {
-        tiles.loadConnectedMap(ConnectionKind.Door1)
-        tiles.placeOnRandomTile(player_sprite, tiles.util.door0)
-        return true
-    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door2)) {
-        tiles.loadConnectedMap(ConnectionKind.Door2)
-        tiles.placeOnRandomTile(player_sprite, tiles.util.door2)
-        return true
+    } else if (false) {
+    	
+    } else if (false) {
+    	
+    } else if (false) {
+    	
     } else {
         return false
     }
@@ -493,6 +529,7 @@ function upContextAction () {
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     takeDamage()
 })
+let upgrade_firstSand = false
 let statusbar2: StatusBarSprite = null
 let statusbar: StatusBarSprite = null
 let hourglass: Sprite = null
@@ -505,6 +542,7 @@ let list: tiles.Location[] = []
 let sand: Sprite = null
 let player_respawnY = 0
 let player_respawnX = 0
+let upgrade_fillHourglass = false
 let projectile: Sprite = null
 let player_canJump = false
 let player_gravity = 0
@@ -521,9 +559,10 @@ let duration_hourglass = 0
 let player_facing = 0
 let cutscene_isPlaying = false
 game.splash("Sandman's Sojourn")
-game.showLongText("Use Left and Right buttons to move and Up to jump", DialogLayout.Center)
-game.showLongText("Press B to Throw Sand to put enemies to sleep", DialogLayout.Center)
-game.showLongText("You only have so much Sand but more can be collected from Vortexes", DialogLayout.Center)
+game.showLongText("The Sandman has become trapped in someone's dream", DialogLayout.Full)
+game.showLongText("Use Left and Right buttons to move and Up to jump", DialogLayout.Full)
+game.showLongText("Watch out for enemies and bottomless pits", DialogLayout.Full)
+game.showLongText("If you get hurt, collecting dream orbs will refill your health", DialogLayout.Full)
 cutscene_isPlaying = false
 scene.setBackgroundColor(12)
 player_facing = 1
