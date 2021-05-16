@@ -141,11 +141,8 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
 })
 function startGame () {
     connectRooms()
-    tiles.loadMap(list_Rooms[1])
+    tiles.loadMap(list_Rooms[0])
     tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
-    upgrade_fillHourglass = true
-    upgrade_makeHourglasas = true
-    info.setScore(player_sandMax)
     player_sprite.setPosition(player_sprite.x + tiles.tileWidth(), player_sprite.y)
 }
 function connectRooms () {
@@ -587,9 +584,9 @@ let statusbar: StatusBarSprite = null
 let hourglass: Sprite = null
 let status_bar_list: StatusBarSprite[] = []
 let flipStatusbar: StatusBarSprite = null
+let upgrade_makeHourglasas = false
 let statusbar3: StatusBarSprite = null
 let tempSprite: Sprite = null
-let upgrade_makeHourglasas = false
 let list_Rooms: tiles.WorldMap[] = []
 let list: tiles.Location[] = []
 let sand: Sprite = null
