@@ -485,24 +485,7 @@ statusbars.onZero(StatusBarKind.Energy, function (status) {
     }
 })
 sprites.onCreated(SpriteKind.Ammo, function (sprite) {
-    sprite.setImage(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . 4 4 . . . . . . . 
-        . . . . . . 4 4 e 4 . . . . . . 
-        . . . . . 4 4 4 4 e 4 . . . . . 
-        . . . . 4 4 4 e 4 4 e 4 . . . . 
-        . . . 4 4 4 4 4 e 4 e 4 . . . . 
-        . . . 4 4 4 e 4 4 e 4 e 4 . . . 
-        . . 4 4 4 4 4 e 4 4 e 4 e 4 . . 
-        . 4 4 4 4 e e 4 e 4 4 e 4 e 4 . 
-        4 4 4 e e e e e e e 4 4 e 4 e 4 
-        `)
+    sprite.setImage(assets.image`pickup_sand`)
     sprite.ay = 100
 })
 function updateTimers () {
