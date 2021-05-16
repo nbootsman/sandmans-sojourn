@@ -33,20 +33,22 @@ sprites.onCreated(SpriteKind.Enemy, function (sprite) {
     }
 })
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (cutscene_isPlaying) {
-    	
-    } else if (upContextAction()) {
-    	
-    } else if (upDoorAction()) {
-        updateRespawn()
-    } else if (player_canJump) {
-        player_sprite.vy = -85
-        player_sprite.ay = -10
-        player_canJump = false
-        controller.configureRepeatEventDefaults(250, 30)
-    } else {
-    	
-    }
+    timer.throttle("upAction", 100, function () {
+        if (cutscene_isPlaying) {
+        	
+        } else if (upContextAction()) {
+        	
+        } else if (upDoorAction()) {
+            updateRespawn()
+        } else if (player_canJump) {
+            player_sprite.vy = -85
+            player_sprite.ay = -10
+            player_canJump = false
+            controller.configureRepeatEventDefaults(250, 30)
+        } else {
+        	
+        }
+    })
 })
 sprites.onDestroyed(SpriteKind.Construct, function (sprite) {
     tiles.setWallAt(tiles.locationOfSprite(sprite), false)
@@ -248,30 +250,30 @@ scene.onHitWall(SpriteKind.Construct, function (sprite, location) {
     }
 })
 tiles.onMapLoaded(function (tilemap2) {
-    tiles.replaceAllTiles(tiles.util.object7, assets.tile`transparency16`)
+    tiles.replaceAllTiles(tiles.util.object7, assets.tile`background_purple`)
     tiles.coverAllTiles(tiles.util.door0, sprites.dungeon.doorOpenNorth)
     tiles.coverAllTiles(tiles.util.door2, sprites.dungeon.doorOpenNorth)
     tiles.coverAllTiles(tiles.util.door8, sprites.dungeon.doorOpenNorth)
     tiles.replaceAllTiles(tiles.util.object13, assets.tile`sandVortex`)
     tiles.createSpritesOnTiles(tiles.util.object8, SpriteKind.Ammo)
-    tiles.replaceAllTiles(tiles.util.object8, assets.tile`transparency16`)
+    tiles.coverAllTiles(tiles.util.object8, assets.tile`background_purple`)
     tiles.createSpritesOnTiles(tiles.util.object10, SpriteKind.Food)
-    tiles.replaceAllTiles(tiles.util.object10, assets.tile`transparency16`)
+    tiles.coverAllTiles(tiles.util.object10, assets.tile`background_purple`)
     tiles.createSpritesOnTiles(tiles.util.arrow4, SpriteKind.Enemy)
-    tiles.replaceAllTiles(tiles.util.arrow4, assets.tile`transparency16`)
+    tiles.coverAllTiles(tiles.util.arrow4, assets.tile`background_purple`)
     tiles.createSpritesOnTiles(tiles.util.arrow5, SpriteKind.Enemy)
-    tiles.replaceAllTiles(tiles.util.arrow5, assets.tile`transparency16`)
+    tiles.coverAllTiles(tiles.util.arrow5, assets.tile`background_purple`)
     tiles.createSpritesOnTiles(tiles.util.arrow0, SpriteKind.Enemy)
-    tiles.replaceAllTiles(tiles.util.arrow0, assets.tile`transparency16`)
+    tiles.coverAllTiles(tiles.util.arrow0, assets.tile`background_purple`)
     tiles.createSpritesOnTiles(tiles.util.arrow1, SpriteKind.Enemy)
-    tiles.replaceAllTiles(tiles.util.arrow1, assets.tile`transparency16`)
+    tiles.coverAllTiles(tiles.util.arrow1, assets.tile`background_purple`)
     tiles.createSpritesOnTiles(tiles.util.arrow8, SpriteKind.Cannon)
-    tiles.replaceAllTiles(tiles.util.arrow8, assets.tile`transparency16`)
+    tiles.coverAllTiles(tiles.util.arrow8, assets.tile`background_purple`)
     if (upgrade_fillHourglass) {
-        tiles.replaceAllTiles(assets.tile`pickup_cosmicFunnel`, assets.tile`transparency16`)
+        tiles.replaceAllTiles(assets.tile`pickup_cosmicFunnel`, assets.tile`background_purple`)
     }
     if (upgrade_makeHourglasas) {
-        tiles.replaceAllTiles(assets.tile`pickup_hourglassForge`, assets.tile`transparency16`)
+        tiles.replaceAllTiles(assets.tile`pickup_hourglassForge`, assets.tile`background_purple`)
     }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Ammo, function (sprite, otherSprite) {
@@ -362,6 +364,8 @@ tiles.onMapUnloaded(function (tilemap2) {
     tiles.destroySpritesOfKind(SpriteKind.TempSprite)
     tiles.destroySpritesOfKind(SpriteKind.SleepingEnemy)
     tiles.destroySpritesOfKind(SpriteKind.Door)
+    tiles.destroySpritesOfKind(SpriteKind.Cannon)
+    tiles.destroySpritesOfKind(SpriteKind.CannonProjectile)
 })
 function updateRespawn () {
     timer.after(50, function () {
