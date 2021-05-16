@@ -111,24 +111,7 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
     tiles.replaceAllTiles(assets.tile`hourglass-top`, assets.tile`hourglass-top0`)
     tiles.replaceAllTiles(assets.tile`hourglass-bottom0`, assets.tile`hourglass-bottom1`)
     for (let index2 = 0; index2 <= cost_fillHourglass - 1; index2++) {
-        sand = sprites.create(img`
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . 4 4 . . . . . . . 
-            . . . . . . 4 4 e 4 . . . . . . 
-            . . . . . 4 4 4 4 e 4 . . . . . 
-            . . . . 4 4 4 e 4 4 e 4 . . . . 
-            . . . 4 4 4 4 4 e 4 e 4 . . . . 
-            . . . 4 4 4 e 4 4 e 4 e 4 . . . 
-            . . 4 4 4 4 4 e 4 4 e 4 e 4 . . 
-            . 4 4 4 4 e e 4 e 4 4 e 4 e 4 . 
-            4 4 4 e e e e e e e 4 4 e 4 e 4 
-            `, SpriteKind.Ammo)
+        sand = sprites.create(assets.image`pickup_sand`, SpriteKind.Ammo)
         sand.setPosition(status.spriteAttachedTo().x + index2, status.spriteAttachedTo().y)
     }
     list = tiles.getTilesByType(sprites.dungeon.floorLight2)
@@ -463,24 +446,7 @@ scene.onOverlapTile(SpriteKind.Player, tiles.util.door8, function (sprite, locat
 statusbars.onZero(StatusBarKind.Energy, function (status) {
     status.spriteAttachedTo().destroy(effects.disintegrate, 500)
     for (let index3 = 0; index3 <= cost_fillHourglass - 1; index3++) {
-        sand = sprites.create(img`
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . 4 4 . . . . . . . 
-            . . . . . . 4 4 e 4 . . . . . . 
-            . . . . . 4 4 4 4 e 4 . . . . . 
-            . . . . 4 4 4 e 4 4 e 4 . . . . 
-            . . . 4 4 4 4 4 e 4 e 4 . . . . 
-            . . . 4 4 4 e 4 4 e 4 e 4 . . . 
-            . . 4 4 4 4 4 e 4 4 e 4 e 4 . . 
-            . 4 4 4 4 e e 4 e 4 4 e 4 e 4 . 
-            4 4 4 e e e e e e e 4 4 e 4 e 4 
-            `, SpriteKind.Ammo)
+        sand = sprites.create(assets.image`pickup_sand`, SpriteKind.Ammo)
         sand.setPosition(status.spriteAttachedTo().x + index3 * 4, status.spriteAttachedTo().top)
     }
 })
