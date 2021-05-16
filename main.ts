@@ -137,9 +137,7 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
 })
 function startGame () {
     connectRooms()
-    tiles.loadMap(list_Rooms[4])
-    upgrade_fillHourglass = true
-    info.setScore(player_sandMax)
+    tiles.loadMap(list_Rooms[0])
     tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
     player_sprite.setPosition(player_sprite.x + tiles.tileWidth(), player_sprite.y)
 }
