@@ -137,7 +137,7 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
 })
 function startGame () {
     connectRooms()
-    tiles.loadMap(list_Rooms[3])
+    tiles.loadMap(list_Rooms[4])
     upgrade_fillHourglass = true
     info.setScore(player_sandMax)
     tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
@@ -263,9 +263,10 @@ tiles.onMapLoaded(function (tilemap2) {
     }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Ammo, function (sprite, otherSprite) {
-    otherSprite.destroy(effects.warmRadial, 500)
-    info.changeScoreBy(1)
-    info.setScore(Math.min(info.score(), player_sandMax))
+    if (info.score() < player_sandMax) {
+        info.changeScoreBy(1)
+        otherSprite.destroy(effects.warmRadial, 500)
+    }
 })
 function takeDamage () {
     timer.throttle("action", duration_damageImmunity, function () {
