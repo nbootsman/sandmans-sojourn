@@ -63,7 +63,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 scene.onOverlapTile(SpriteKind.Player, assets.tile`hourglass-top0`, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`hourglass-top0`)) {
         if (upgrade_fillHourglass) {
-            sprite.say("A to Fill", 200)
+            sprite.say("A: Fill", 200)
         }
     }
 })
@@ -91,7 +91,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 scene.onOverlapTile(SpriteKind.Player, tiles.util.door0, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door0)) {
-        player_sprite.say("UP to Enter", 200)
+        player_sprite.say("UP: Enter", 200)
     }
 })
 sprites.onCreated(SpriteKind.Food, function (sprite) {
@@ -137,8 +137,11 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
 })
 function startGame () {
     connectRooms()
-    tiles.loadMap(list_Rooms[0])
+    tiles.loadMap(list_Rooms[3])
     tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
+    upgrade_fillHourglass = true
+    upgrade_makeHourglasas = true
+    info.setScore(player_sandMax)
     player_sprite.setPosition(player_sprite.x + tiles.tileWidth(), player_sprite.y)
 }
 function connectRooms () {
@@ -222,7 +225,7 @@ controller.right.onEvent(ControllerButtonEvent.Released, function () {
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`pickup_cosmicFunnel`, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`pickup_cosmicFunnel`)) {
-        sprite.say("UP to Pickup", 200)
+        sprite.say("UP: Pickup", 200)
     }
 })
 controller.left.onEvent(ControllerButtonEvent.Released, function () {
@@ -242,6 +245,7 @@ tiles.onMapLoaded(function (tilemap2) {
     tiles.replaceAllTiles(tiles.util.object7, assets.tile`transparency16`)
     tiles.coverAllTiles(tiles.util.door0, sprites.dungeon.doorOpenNorth)
     tiles.coverAllTiles(tiles.util.door2, sprites.dungeon.doorOpenNorth)
+    tiles.coverAllTiles(tiles.util.door8, sprites.dungeon.doorOpenNorth)
     tiles.replaceAllTiles(tiles.util.object13, assets.tile`sandVortex`)
     tiles.createSpritesOnTiles(tiles.util.object8, SpriteKind.Ammo)
     tiles.replaceAllTiles(tiles.util.object8, assets.tile`transparency16`)
@@ -357,7 +361,7 @@ function updateRespawn () {
 }
 scene.onOverlapTile(SpriteKind.Player, tiles.util.door2, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door2)) {
-        player_sprite.say("UP to Enter", 200)
+        player_sprite.say("UP: Enter", 200)
     }
 })
 controller.up.onEvent(ControllerButtonEvent.Released, function () {
@@ -384,7 +388,7 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`pickup_hourglassForge`, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`pickup_hourglassForge`)) {
-        sprite.say("UP to Pickup", 200)
+        sprite.say("UP: Pickup", 200)
     }
 })
 info.onLifeZero(function () {
@@ -417,6 +421,11 @@ function payCost (cost: number) {
         return false
     }
 }
+scene.onOverlapTile(SpriteKind.Player, tiles.util.door8, function (sprite, location) {
+    if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door8)) {
+        player_sprite.say("UP: Enter", 200)
+    }
+})
 statusbars.onZero(StatusBarKind.Energy, function (status) {
     status.spriteAttachedTo().destroy(effects.disintegrate, 500)
     for (let index3 = 0; index3 <= cost_fillHourglass - 1; index3++) {
@@ -491,7 +500,7 @@ function getCanJump () {
 scene.onOverlapTile(SpriteKind.Player, assets.tile`hourglass-bottom1`, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`hourglass-bottom1`)) {
         if (upgrade_fillHourglass) {
-            sprite.say("A to Fill", 200)
+            sprite.say("A: Fill", 200)
         }
     }
 })
@@ -513,7 +522,7 @@ function dropHourglass () {
 }
 scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.doorOpenNorth, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, sprites.dungeon.doorOpenNorth)) {
-        player_sprite.say("UP to Escape!", 200)
+        player_sprite.say("UP: Escape!", 200)
     }
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
@@ -525,7 +534,7 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`sandVortex`, function (sprite, location) {
     if (sprite.tileKindAt(TileDirection.Center, assets.tile`sandVortex`)) {
-        player_sprite.say("UP to Gather", 200)
+        player_sprite.say("UP: Gather", 200)
     }
 })
 function upContextAction () {
@@ -570,9 +579,9 @@ let statusbar: StatusBarSprite = null
 let hourglass: Sprite = null
 let status_bar_list: StatusBarSprite[] = []
 let flipStatusbar: StatusBarSprite = null
-let upgrade_makeHourglasas = false
 let statusbar3: StatusBarSprite = null
 let tempSprite: Sprite = null
+let upgrade_makeHourglasas = false
 let list_Rooms: tiles.WorldMap[] = []
 let list: tiles.Location[] = []
 let sand: Sprite = null
