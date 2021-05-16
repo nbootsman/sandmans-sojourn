@@ -18,8 +18,7 @@
         "tilemap.g.jres",
         "tilemap.g.ts",
         "images.g.jres",
-        "images.g.ts",
-        null
+        "images.g.ts"
     ],
     "testFiles": [
         "test.ts"
