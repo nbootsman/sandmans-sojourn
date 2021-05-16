@@ -8,11 +8,9 @@ namespace SpriteKind {
 namespace StatusBarKind {
     export const Environment = StatusBarKind.create()
 }
-scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, location) {
-    if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`myTile0`)) {
-        sprite.say("UP to Pickup", 200)
-    }
-})
+namespace ConnectionKind {
+    export const Door3 = ConnectionKind.create()
+}
 sprites.onCreated(SpriteKind.Enemy, function (sprite) {
     if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow4)) {
         sprite.setImage(assets.image`enemy_ghost`)
@@ -36,7 +34,7 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     } else if (upContextAction()) {
     	
     } else if (upDoorAction()) {
-    	
+        updateRespawn()
     } else if (player_canJump) {
         player_sprite.vy = -85
         player_sprite.ay = -10
@@ -139,7 +137,9 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
 })
 function startGame () {
     connectRooms()
-    tiles.loadMap(list_Rooms[0])
+    tiles.loadMap(list_Rooms[3])
+    upgrade_fillHourglass = true
+    info.setScore(player_sandMax)
     tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
     player_sprite.setPosition(player_sprite.x + tiles.tileWidth(), player_sprite.y)
 }
@@ -147,9 +147,14 @@ function connectRooms () {
     list_Rooms = [tiles.createMap(tilemap`level_1`)]
     list_Rooms.push(tiles.createMap(tilemap`level_2`))
     list_Rooms.push(tiles.createMap(tilemap`level_3`))
+    list_Rooms.push(tiles.createMap(tilemap`level_4`))
+    list_Rooms.push(tiles.createMap(tilemap`level_5`))
     list_Rooms.push(tiles.createMap(tilemap`level0`))
     tiles.connectMapById(list_Rooms[0], list_Rooms[1], ConnectionKind.Door1)
     tiles.connectMapById(list_Rooms[1], list_Rooms[2], ConnectionKind.Door2)
+    tiles.connectMapById(list_Rooms[2], list_Rooms[3], ConnectionKind.Door1)
+    tiles.connectMapById(list_Rooms[2], list_Rooms[3], ConnectionKind.Door3)
+    tiles.connectMapById(list_Rooms[3], list_Rooms[4], ConnectionKind.Door2)
 }
 function fillHourglass () {
     if (upgrade_fillHourglass && payCost(cost_fillHourglass)) {
@@ -217,6 +222,11 @@ controller.right.onEvent(ControllerButtonEvent.Released, function () {
         animation.stopAnimation(animation.AnimationTypes.ImageAnimation, player_sprite)
     }
 })
+scene.onOverlapTile(SpriteKind.Player, assets.tile`pickup_cosmicFunnel`, function (sprite, location) {
+    if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`pickup_cosmicFunnel`)) {
+        sprite.say("UP to Pickup", 200)
+    }
+})
 controller.left.onEvent(ControllerButtonEvent.Released, function () {
     if (cutscene_isPlaying) {
     	
@@ -245,6 +255,12 @@ tiles.onMapLoaded(function (tilemap2) {
     tiles.replaceAllTiles(tiles.util.arrow5, assets.tile`transparency16`)
     tiles.createSpritesOnTiles(tiles.util.arrow0, SpriteKind.Enemy)
     tiles.replaceAllTiles(tiles.util.arrow0, assets.tile`transparency16`)
+    if (upgrade_fillHourglass) {
+        tiles.replaceAllTiles(assets.tile`pickup_cosmicFunnel`, assets.tile`transparency16`)
+    }
+    if (upgrade_makeHourglasas) {
+        tiles.replaceAllTiles(assets.tile`pickup_hourglassForge`, assets.tile`transparency16`)
+    }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Ammo, function (sprite, otherSprite) {
     otherSprite.destroy(effects.warmRadial, 500)
@@ -280,14 +296,14 @@ function getHasFallen () {
                 100,
                 false
                 )
-                timer.after(500, function () {
-                    animation.stopAnimation(animation.AnimationTypes.All, player_sprite)
-                    player_sprite.setImage(assets.image`sandman`)
-                    player_sprite.setVelocity(0, 0)
-                    player_sprite.setPosition(player_respawnX, player_respawnY)
-                    cutscene_isPlaying = false
-                })
             }
+            timer.after(500, function () {
+                animation.stopAnimation(animation.AnimationTypes.All, player_sprite)
+                player_sprite.setImage(assets.image`sandman`)
+                player_sprite.setVelocity(0, 0)
+                player_sprite.setPosition(player_respawnX, player_respawnY)
+                cutscene_isPlaying = false
+            })
         }
     }
 }
@@ -302,6 +318,10 @@ function upDoorAction () {
     } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door2)) {
         tiles.loadConnectedMap(ConnectionKind.Door2)
         tiles.placeOnRandomTile(player_sprite, tiles.util.door2)
+        return true
+    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door8)) {
+        tiles.loadConnectedMap(ConnectionKind.Door3)
+        tiles.placeOnRandomTile(player_sprite, tiles.util.door8)
         return true
     } else {
         return false
@@ -330,6 +350,12 @@ tiles.onMapUnloaded(function (tilemap2) {
     tiles.destroySpritesOfKind(SpriteKind.SleepingEnemy)
     tiles.destroySpritesOfKind(SpriteKind.Door)
 })
+function updateRespawn () {
+    timer.after(50, function () {
+        player_respawnX = player_sprite.x
+        player_respawnY = player_sprite.y
+    })
+}
 scene.onOverlapTile(SpriteKind.Player, tiles.util.door2, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door2)) {
         player_sprite.say("UP to Enter", 200)
@@ -355,6 +381,11 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
             flipStatusbar.value = flipStatusbar.max - flipStatusbar.value
             value3.setImage(assets.image`hourglass_broken`)
         }
+    }
+})
+scene.onOverlapTile(SpriteKind.Player, assets.tile`pickup_hourglassForge`, function (sprite, location) {
+    if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`pickup_hourglassForge`)) {
+        sprite.say("UP to Pickup", 200)
     }
 })
 info.onLifeZero(function () {
@@ -467,7 +498,6 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`hourglass-bottom1`, function 
 })
 function dropHourglass () {
     timer.throttle("dropHourglass", 1000, function () {
-        let upgrade_makeHourglasas = 0
         if (upgrade_makeHourglasas && payCost(cost_makeHourglass)) {
             hourglass = sprites.create(assets.image`hourglass_filled`, SpriteKind.Construct)
             hourglass.setPosition(player_sprite.x, player_sprite.top)
@@ -509,15 +539,21 @@ function upContextAction () {
         }
         info.setScore(Math.max(player_sandMax, info.score()))
         return true
-    } else if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`myTile0`)) {
+    } else if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`pickup_cosmicFunnel`)) {
         upgrade_fillHourglass = true
-        tiles.replaceAllTiles(assets.tile`myTile0`, assets.tile`transparency16`)
+        tiles.replaceAllTiles(assets.tile`pickup_cosmicFunnel`, assets.tile`transparency16`)
         game.showLongText("Cosmic Funnel - Converts the Sands of Sleep to the Sands of Time", DialogLayout.Top)
         game.showLongText("Press A when standing near an Hourglass to fill it and temporarily change the dream around you", DialogLayout.Top)
         game.showLongText("It costs 2 Sand to fill an Hourglass which will be returned when it runs out", DialogLayout.Bottom)
         return true
-    } else if (false) {
-    	
+    } else if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`pickup_hourglassForge`)) {
+        upgrade_makeHourglasas = true
+        tiles.replaceAllTiles(assets.tile`pickup_hourglassForge`, assets.tile`transparency16`)
+        game.showLongText("Forge of Time: Hourglass - Melts the sands of time into an Hourglass", DialogLayout.Top)
+        game.showLongText("Press A to drop an Hourglass that acts as a wall and a platform", DialogLayout.Top)
+        game.showLongText("It costs 3 Sand to make the Hourglass and fill it ", DialogLayout.Top)
+        game.showLongText("When the sand filling it runs out, the Hourglass will disappear and drop the sand inside", DialogLayout.Top)
+        return true
     } else if (false) {
     	
     } else if (false) {
@@ -535,6 +571,7 @@ let statusbar: StatusBarSprite = null
 let hourglass: Sprite = null
 let status_bar_list: StatusBarSprite[] = []
 let flipStatusbar: StatusBarSprite = null
+let upgrade_makeHourglasas = false
 let statusbar3: StatusBarSprite = null
 let tempSprite: Sprite = null
 let list_Rooms: tiles.WorldMap[] = []
