@@ -4,6 +4,8 @@ namespace SpriteKind {
     export const TempSprite = SpriteKind.create()
     export const Ammo = SpriteKind.create()
     export const Door = SpriteKind.create()
+    export const Cannon = SpriteKind.create()
+    export const CannonProjectile = SpriteKind.create()
 }
 namespace StatusBarKind {
     export const Environment = StatusBarKind.create()
@@ -28,8 +30,6 @@ sprites.onCreated(SpriteKind.Enemy, function (sprite) {
         sprite.setImage(assets.image`enemy_ghost`)
         sprite.vx = 50
         sprite.setBounceOnWall(true)
-    } else {
-    	
     }
 })
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -83,6 +83,9 @@ controller.up.onEvent(ControllerButtonEvent.Repeated, function () {
     } else {
         player_sprite.ay = player_gravity
     }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.CannonProjectile, function (sprite, otherSprite) {
+    takeDamage()
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cutscene_isPlaying) {
@@ -141,7 +144,10 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
 })
 function startGame () {
     connectRooms()
-    tiles.loadMap(list_Rooms[0])
+    tiles.loadMap(list_Rooms[5])
+    upgrade_fillHourglass = true
+    upgrade_makeHourglasas = true
+    info.setScore(player_sandMax)
     tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
     player_sprite.setPosition(player_sprite.x + tiles.tileWidth(), player_sprite.y)
 }
@@ -262,6 +268,8 @@ tiles.onMapLoaded(function (tilemap2) {
     tiles.replaceAllTiles(tiles.util.arrow0, assets.tile`transparency16`)
     tiles.createSpritesOnTiles(tiles.util.arrow1, SpriteKind.Enemy)
     tiles.replaceAllTiles(tiles.util.arrow1, assets.tile`transparency16`)
+    tiles.createSpritesOnTiles(tiles.util.arrow8, SpriteKind.Cannon)
+    tiles.replaceAllTiles(tiles.util.arrow8, assets.tile`transparency16`)
     if (upgrade_fillHourglass) {
         tiles.replaceAllTiles(assets.tile`pickup_cosmicFunnel`, assets.tile`transparency16`)
     }
@@ -369,6 +377,20 @@ scene.onOverlapTile(SpriteKind.Player, tiles.util.door2, function (sprite, locat
         player_sprite.say("UP: Enter", 200)
     }
 })
+function fireCannons () {
+    timer.throttle("fireCannons", 2000, function () {
+        for (let value of sprites.allOfKind(SpriteKind.Cannon)) {
+            if (value.image.equals(assets.image`enemy_cannonUp`)) {
+                projectile2 = sprites.createProjectileFromSprite(assets.image`myImage`, value, 0, -120)
+                projectile2.setKind(SpriteKind.CannonProjectile)
+                projectile2.startEffect(effects.fire)
+            }
+        }
+    })
+}
+sprites.onOverlap(SpriteKind.Enemy, SpriteKind.CannonProjectile, function (sprite, otherSprite) {
+    sprite.destroy(effects.fire, 500)
+})
 controller.up.onEvent(ControllerButtonEvent.Released, function () {
     if (cutscene_isPlaying) {
     	
@@ -398,6 +420,11 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`pickup_hourglassForge`, funct
 })
 info.onLifeZero(function () {
     game.over(false)
+})
+sprites.onCreated(SpriteKind.Cannon, function (sprite) {
+    if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow8)) {
+        sprite.setImage(assets.image`enemy_cannonUp`)
+    }
 })
 function putEnemyToSleep (enemySprite: Sprite, orignalVx: number, originalVy: number) {
     enemySprite.setKind(SpriteKind.SleepingEnemy)
@@ -584,9 +611,10 @@ let statusbar: StatusBarSprite = null
 let hourglass: Sprite = null
 let status_bar_list: StatusBarSprite[] = []
 let flipStatusbar: StatusBarSprite = null
-let upgrade_makeHourglasas = false
+let projectile2: Sprite = null
 let statusbar3: StatusBarSprite = null
 let tempSprite: Sprite = null
+let upgrade_makeHourglasas = false
 let list_Rooms: tiles.WorldMap[] = []
 let list: tiles.Location[] = []
 let sand: Sprite = null
@@ -656,4 +684,5 @@ game.onUpdate(function () {
 })
 game.onUpdateInterval(duration_tickRate, function () {
     updateTimers()
+    fireCannons()
 })

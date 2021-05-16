@@ -207,6 +207,44 @@ e94444444444449e
 ........................
 ........................
 `;
+            case "image1":
+            case "enemy_cannonUp":return img`
+. . . . . . b b b b . . . . . . 
+. . . . . b 2 5 5 2 b . . . . . 
+. . . . . . b d b b . . . . . . 
+. . . . . b d d b a b . . . . . 
+. . . . . b d d b a b . . . . . 
+. . . . b d d d d b a b . . . . 
+. . . . b d d d d b a b . . . . 
+. . . . b b d d d b b b . . . . 
+. . . b d d d d d b a a b . . . 
+. . b b d 2 2 2 2 2 2 a b b . . 
+. b d b d 2 4 4 4 4 2 a b d b . 
+b d d b d 2 4 5 5 4 2 a b d d b 
+a d d b d 2 4 5 5 4 2 a b d d a 
+a d b b d 2 4 4 4 4 2 a b b d a 
+a b . b d 2 2 2 2 2 2 a b . b a 
+a b . . b b b b b b b b . . b a 
+`;
+            case "image2":
+            case "myImage":return img`
+. . 2 2 2 2 . . 
+. 2 2 4 4 2 2 . 
+. 2 4 4 5 4 2 . 
+. 2 4 5 5 4 2 . 
+. 2 4 5 5 4 2 . 
+. 2 4 5 4 4 2 . 
+. . 2 4 4 2 . . 
+. 2 . 2 2 . 2 . 
+. . . 5 . 4 . . 
+. 2 4 . 5 . . . 
+. . . 5 . 4 . . 
+. . 4 . 4 . 2 . 
+. . . . . 2 . . 
+. . 2 . . . . . 
+. . . . 2 . . . 
+. . . 2 . . . . 
+`;
         }
         return null;
     })
