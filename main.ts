@@ -24,6 +24,10 @@ sprites.onCreated(SpriteKind.Enemy, function (sprite) {
         sprite.setImage(assets.image`enemy_ghost2`)
         sprite.vy = -50
         sprite.setBounceOnWall(true)
+    } else if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow1)) {
+        sprite.setImage(assets.image`enemy_ghost`)
+        sprite.vx = 50
+        sprite.setBounceOnWall(true)
     } else {
     	
     }
@@ -137,7 +141,7 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
 })
 function startGame () {
     connectRooms()
-    tiles.loadMap(list_Rooms[3])
+    tiles.loadMap(list_Rooms[1])
     tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
     upgrade_fillHourglass = true
     upgrade_makeHourglasas = true
@@ -150,9 +154,11 @@ function connectRooms () {
     list_Rooms.push(tiles.createMap(tilemap`level_3`))
     list_Rooms.push(tiles.createMap(tilemap`level_4`))
     list_Rooms.push(tiles.createMap(tilemap`level_5`))
+    list_Rooms.push(tiles.createMap(tilemap`level_6`))
     list_Rooms.push(tiles.createMap(tilemap`level0`))
     tiles.connectMapById(list_Rooms[0], list_Rooms[1], ConnectionKind.Door1)
     tiles.connectMapById(list_Rooms[1], list_Rooms[2], ConnectionKind.Door2)
+    tiles.connectMapById(list_Rooms[1], list_Rooms[5], ConnectionKind.Door3)
     tiles.connectMapById(list_Rooms[2], list_Rooms[3], ConnectionKind.Door1)
     tiles.connectMapById(list_Rooms[2], list_Rooms[3], ConnectionKind.Door3)
     tiles.connectMapById(list_Rooms[3], list_Rooms[4], ConnectionKind.Door2)
@@ -257,6 +263,8 @@ tiles.onMapLoaded(function (tilemap2) {
     tiles.replaceAllTiles(tiles.util.arrow5, assets.tile`transparency16`)
     tiles.createSpritesOnTiles(tiles.util.arrow0, SpriteKind.Enemy)
     tiles.replaceAllTiles(tiles.util.arrow0, assets.tile`transparency16`)
+    tiles.createSpritesOnTiles(tiles.util.arrow1, SpriteKind.Enemy)
+    tiles.replaceAllTiles(tiles.util.arrow1, assets.tile`transparency16`)
     if (upgrade_fillHourglass) {
         tiles.replaceAllTiles(assets.tile`pickup_cosmicFunnel`, assets.tile`transparency16`)
     }
