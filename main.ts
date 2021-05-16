@@ -245,6 +245,7 @@ controller.left.onEvent(ControllerButtonEvent.Released, function () {
 })
 scene.onHitWall(SpriteKind.Construct, function (sprite, location) {
     if (sprite.isHittingTile(CollisionDirection.Bottom)) {
+        sprite.x = tiles.locationXY(location, tiles.XY.x)
         tiles.setWallAt(tiles.locationOfSprite(sprite), true)
         tiles.setWallAt(tiles.locationInDirection(tiles.locationOfSprite(sprite), CollisionDirection.Top), true)
     }
@@ -523,7 +524,7 @@ function getCanJump () {
         return true
     } else {
         for (let value7 of sprites.allOfKind(SpriteKind.Construct)) {
-            if (player_sprite.overlapsWith(value7)) {
+            if (player_sprite.overlapsWith(value7) && value7.isHittingTile(CollisionDirection.Bottom)) {
                 return true
             }
         }
@@ -585,7 +586,7 @@ function upContextAction () {
         tiles.replaceAllTiles(assets.tile`pickup_cosmicFunnel`, assets.tile`transparency16`)
         game.showLongText("Cosmic Funnel - Converts the Sands of Sleep to the Sands of Time", DialogLayout.Top)
         game.showLongText("Press A when standing near an Hourglass to fill it and temporarily change the dream around you", DialogLayout.Top)
-        game.showLongText("It costs 2 Sand to fill an Hourglass which will be returned when it runs out", DialogLayout.Bottom)
+        game.showLongText("It costs 2 Sand to fill an Hourglass which will be returned when it runs out", DialogLayout.Top)
         return true
     } else if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`pickup_hourglassForge`)) {
         upgrade_makeHourglasas = true
