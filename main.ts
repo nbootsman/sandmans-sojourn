@@ -88,6 +88,7 @@ controller.up.onEvent(ControllerButtonEvent.Repeated, function () {
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.CannonProjectile, function (sprite, otherSprite) {
     takeDamage()
+    otherSprite.destroy(effects.fire, 500)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cutscene_isPlaying) {
@@ -129,7 +130,10 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
 })
 function startGame () {
     connectRooms()
-    tiles.loadMap(list_Rooms[0])
+    tiles.loadMap(list_Rooms[5])
+    upgrade_fillHourglass = true
+    upgrade_makeHourglasas = true
+    info.setScore(player_sandMax)
     tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
     player_sprite.setPosition(player_sprite.x + tiles.tileWidth(), player_sprite.y)
 }
@@ -227,14 +231,26 @@ controller.left.onEvent(ControllerButtonEvent.Released, function () {
     }
 })
 scene.onHitWall(SpriteKind.Construct, function (sprite, location) {
+    if (sprite.isHittingTile(CollisionDirection.Left)) {
+        sprite.x = tiles.locationXY(tiles.locationInDirection(location, CollisionDirection.Right), tiles.XY.x)
+        sprite.vx = 0
+    } else if (sprite.isHittingTile(CollisionDirection.Right)) {
+        sprite.x = tiles.locationXY(tiles.locationInDirection(location, CollisionDirection.Left), tiles.XY.x)
+        sprite.vx = 0
+    }
     if (sprite.isHittingTile(CollisionDirection.Bottom)) {
+        sprite.setVelocity(0, 0)
+        sprite.ay = 0
         sprite.x = tiles.locationXY(location, tiles.XY.x)
-        tiles.setWallAt(tiles.locationOfSprite(sprite), true)
-        tiles.setWallAt(tiles.locationInDirection(tiles.locationOfSprite(sprite), CollisionDirection.Top), true)
+        timer.after(50, function () {
+            tiles.setWallAt(tiles.locationOfSprite(sprite), true)
+            tiles.setWallAt(tiles.locationInDirection(tiles.locationOfSprite(sprite), CollisionDirection.Top), true)
+        })
     }
 })
 sprites.onOverlap(SpriteKind.SleepingEnemy, SpriteKind.CannonProjectile, function (sprite, otherSprite) {
     sprite.destroy(effects.fire, 500)
+    otherSprite.destroy(effects.fire, 500)
 })
 tiles.onMapLoaded(function (tilemap2) {
     tiles.replaceAllTiles(tiles.util.object7, assets.tile`background_purple`)
@@ -272,6 +288,7 @@ tiles.onMapLoaded(function (tilemap2) {
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Ammo, function (sprite, otherSprite) {
     if (info.score() < player_sandMax) {
         info.changeScoreBy(1)
+        otherSprite.ay = -100
         otherSprite.destroy(effects.warmRadial, 500)
     }
 })
@@ -379,12 +396,15 @@ function fireCannons () {
             } else if (value.tileKindAt(TileDirection.Center, tiles.util.arrow9)) {
                 projectile2 = sprites.createProjectileFromSprite(assets.image`fireball_right`, value, 120, 0)
             } else if (value.tileKindAt(TileDirection.Center, tiles.util.arrow13)) {
-                projectile2 = sprites.createProjectileFromSprite(assets.image`fireball_up`, value, 0, -120)
+                projectile2 = sprites.createProjectileFromSprite(assets.image`fireball_up`, value, 0, 120)
                 projectile2.image.flipY()
             } else if (value.tileKindAt(TileDirection.Center, tiles.util.arrow12)) {
-                projectile2 = sprites.createProjectileFromSprite(assets.image`fireball_right`, value, 120, 0)
+                projectile2 = sprites.createProjectileFromSprite(assets.image`fireball_right`, value, -120, 0)
                 projectile2.image.flipX()
             }
+            projectile2.setFlag(SpriteFlag.AutoDestroy, false)
+            projectile2.setFlag(SpriteFlag.DestroyOnWall, true)
+            projectile2.setFlag(SpriteFlag.GhostThroughTiles, true)
             projectile2.startEffect(effects.fire)
             projectile2.setKind(SpriteKind.CannonProjectile)
         }
@@ -392,6 +412,7 @@ function fireCannons () {
 }
 sprites.onOverlap(SpriteKind.Enemy, SpriteKind.CannonProjectile, function (sprite, otherSprite) {
     sprite.destroy(effects.fire, 500)
+    otherSprite.destroy(effects.fire, 500)
 })
 controller.up.onEvent(ControllerButtonEvent.Released, function () {
     if (cutscene_isPlaying) {
@@ -408,10 +429,13 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
         for (let value3 of sprites.allOfKind(SpriteKind.Construct)) {
             if (value3.image.equals(assets.image`hourglass_broken`)) {
                 continue;
+            } else if (value3.vy == 0) {
+                flipStatusbar = statusbars.getStatusBarAttachedTo(StatusBarKind.Energy, value3)
+                flipStatusbar.value = flipStatusbar.max - flipStatusbar.value
+                value3.setImage(assets.image`hourglass_broken`)
+            } else {
+            	
             }
-            flipStatusbar = statusbars.getStatusBarAttachedTo(StatusBarKind.Energy, value3)
-            flipStatusbar.value = flipStatusbar.max - flipStatusbar.value
-            value3.setImage(assets.image`hourglass_broken`)
         }
     }
 })
@@ -452,6 +476,7 @@ function putEnemyToSleep (enemySprite: Sprite, orignalVx: number, originalVy: nu
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
     if (info.life() < player_lifeMax) {
         otherSprite.destroy(effects.coolRadial, 500)
+        otherSprite.ay = -100
         info.changeLifeBy(1)
     }
 })
@@ -517,9 +542,9 @@ function dropHourglass () {
         if (upgrade_makeHourglasas && payCost(cost_makeHourglass)) {
             hourglass = sprites.create(assets.image`hourglass_filled`, SpriteKind.Construct)
             hourglass.setPosition(player_sprite.x, player_sprite.top)
-            hourglass.setVelocity(50 * player_facing, -50)
+            hourglass.setVelocity(50 * player_facing, -25)
             hourglass.ay = 100
-            hourglass.fx = 75
+            hourglass.fx = 50
             statusbar = statusbars.create(4, 32, StatusBarKind.Energy)
             statusbar.attachToSprite(hourglass, -2, 0)
             statusbar.max = duration_hourglass / duration_tickRate
@@ -572,8 +597,6 @@ function upContextAction () {
         return true
     } else if (false) {
     	
-    } else if (false) {
-    	
     } else {
         return false
     }
@@ -588,9 +611,9 @@ let hourglass: Sprite = null
 let status_bar_list: StatusBarSprite[] = []
 let flipStatusbar: StatusBarSprite = null
 let projectile2: Sprite = null
-let upgrade_makeHourglasas = false
 let statusbar3: StatusBarSprite = null
 let tempSprite: Sprite = null
+let upgrade_makeHourglasas = false
 let list_Rooms: tiles.WorldMap[] = []
 let list: tiles.Location[] = []
 let sand: Sprite = null

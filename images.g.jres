@@ -49,18 +49,18 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "pickup_sand"
     },
-    "image2": {
-        "data": "hwQIABAAAAAAAAMAAAAAACAiIiAgAAAAIkREAkBAIABCVFUkBQUAIEJVRSRQQAACIkREAgQEAgAgIiIgACAAAAAAAAAAAAAA",
-        "mimeType": "image/x-mkcd-f4",
-        "displayName": "fireball_up"
-    },
     "image3": {
         "data": "hwQQABAAAAC6ALu7u7sAq7qwLSIiogur2rstRESiu63avS1URaLbrdu9LVRFotu9sL0tRESi2wsAuy0iIqK7AACw3d29qgsAAAC73b27AAAAANvdvboAAAAA2929ugAAAACw3asLAAAAALDdqwsAAAAAANu7AAAAAACwUiULAAAAAAC7uwAAAA==",
         "mimeType": "image/x-mkcd-f4",
         "displayName": "enemy_cannonRight"
     },
+    "image2": {
+        "data": "hwQIAAgAAAAAAAAAICIiICJERAJCVFUkQlVFJCJERAIgIiIgAAAAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "fireball_up"
+    },
     "image4": {
-        "data": "hwQQAAgAAAAAIAAAAAACAAACAAAAACAAAAQEAgBQQAAgBAUAAFBAACAgAgIAQiQAIFREAiNURQIgVEUCIERFAiBCJAIAIiIA",
+        "data": "hwQIAAgAAAAgIAICAEIkACBURAIgVEUCIFRFAiBERQIgQiQCACIiAA==",
         "mimeType": "image/x-mkcd-f4",
         "displayName": "fireball_right"
     },
