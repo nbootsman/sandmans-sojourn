@@ -233,6 +233,9 @@ scene.onHitWall(SpriteKind.Construct, function (sprite, location) {
         tiles.setWallAt(tiles.locationInDirection(tiles.locationOfSprite(sprite), CollisionDirection.Top), true)
     }
 })
+sprites.onOverlap(SpriteKind.SleepingEnemy, SpriteKind.CannonProjectile, function (sprite, otherSprite) {
+    sprite.destroy(effects.fire, 500)
+})
 tiles.onMapLoaded(function (tilemap2) {
     tiles.replaceAllTiles(tiles.util.object7, assets.tile`background_purple`)
     tiles.coverAllTiles(tiles.util.door0, sprites.dungeon.doorOpenNorth)
@@ -253,6 +256,12 @@ tiles.onMapLoaded(function (tilemap2) {
     tiles.coverAllTiles(tiles.util.arrow1, assets.tile`background_purple`)
     tiles.createSpritesOnTiles(tiles.util.arrow8, SpriteKind.Cannon)
     tiles.coverAllTiles(tiles.util.arrow8, assets.tile`background_purple`)
+    tiles.createSpritesOnTiles(tiles.util.arrow9, SpriteKind.Cannon)
+    tiles.coverAllTiles(tiles.util.arrow9, assets.tile`background_purple`)
+    tiles.createSpritesOnTiles(tiles.util.arrow13, SpriteKind.Cannon)
+    tiles.coverAllTiles(tiles.util.arrow13, assets.tile`background_purple`)
+    tiles.createSpritesOnTiles(tiles.util.arrow12, SpriteKind.Cannon)
+    tiles.coverAllTiles(tiles.util.arrow12, assets.tile`background_purple`)
     if (upgrade_fillHourglass) {
         tiles.replaceAllTiles(assets.tile`pickup_cosmicFunnel`, assets.tile`background_purple`)
     }
@@ -365,11 +374,19 @@ scene.onOverlapTile(SpriteKind.Player, tiles.util.door2, function (sprite, locat
 function fireCannons () {
     timer.throttle("fireCannons", 2000, function () {
         for (let value of sprites.allOfKind(SpriteKind.Cannon)) {
-            if (value.image.equals(assets.image`enemy_cannonUp`)) {
-                projectile2 = sprites.createProjectileFromSprite(assets.image`myImage`, value, 0, -120)
-                projectile2.setKind(SpriteKind.CannonProjectile)
-                projectile2.startEffect(effects.fire)
+            if (value.tileKindAt(TileDirection.Center, tiles.util.arrow8)) {
+                projectile2 = sprites.createProjectileFromSprite(assets.image`fireball_up`, value, 0, -120)
+            } else if (value.tileKindAt(TileDirection.Center, tiles.util.arrow9)) {
+                projectile2 = sprites.createProjectileFromSprite(assets.image`fireball_right`, value, 120, 0)
+            } else if (value.tileKindAt(TileDirection.Center, tiles.util.arrow13)) {
+                projectile2 = sprites.createProjectileFromSprite(assets.image`fireball_up`, value, 0, -120)
+                projectile2.image.flipY()
+            } else if (value.tileKindAt(TileDirection.Center, tiles.util.arrow12)) {
+                projectile2 = sprites.createProjectileFromSprite(assets.image`fireball_right`, value, 120, 0)
+                projectile2.image.flipX()
             }
+            projectile2.startEffect(effects.fire)
+            projectile2.setKind(SpriteKind.CannonProjectile)
         }
     })
 }
@@ -409,6 +426,14 @@ info.onLifeZero(function () {
 sprites.onCreated(SpriteKind.Cannon, function (sprite) {
     if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow8)) {
         sprite.setImage(assets.image`enemy_cannonUp`)
+    } else if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow9)) {
+        sprite.setImage(assets.image`enemy_cannonRight`)
+    } else if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow13)) {
+        sprite.setImage(assets.image`enemy_cannonUp`)
+        sprite.image.flipY()
+    } else if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow12)) {
+        sprite.setImage(assets.image`enemy_cannonRight`)
+        sprite.image.flipX()
     }
 })
 function putEnemyToSleep (enemySprite: Sprite, orignalVx: number, originalVy: number) {

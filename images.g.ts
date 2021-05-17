@@ -137,25 +137,6 @@ a d b b d 2 4 4 4 4 2 a b b d a
 a b . b d 2 2 2 2 2 2 a b . b a 
 a b . . b b b b b b b b . . b a 
 `;
-            case "image2":
-            case "myImage":return img`
-. . 2 2 2 2 . . 
-. 2 2 4 4 2 2 . 
-. 2 4 4 5 4 2 . 
-. 2 4 5 5 4 2 . 
-. 2 4 5 5 4 2 . 
-. 2 4 5 4 4 2 . 
-. . 2 4 4 2 . . 
-. 2 . 2 2 . 2 . 
-. . . 5 . 4 . . 
-. 2 4 . 5 . . . 
-. . . 5 . 4 . . 
-. . 4 . 4 . 2 . 
-. . . . . 2 . . 
-. . 2 . . . . . 
-. . . . 2 . . . 
-. . . 2 . . . . 
-`;
             case "JQKNl0`6#ujH":
             case "hourglass_filled":return img`
 .55555555555555.
@@ -244,6 +225,55 @@ a b . . b b b b b b b b . . b a
 . . . 4 4 4 4 e 4 4 e 4 e . . . 
 . . 4 4 4 e e 4 e 4 4 e 4 e . . 
 . 4 4 e e e e e e e 4 4 e 4 e . 
+`;
+            case "image2":
+            case "fireball_up":return img`
+. . 2 2 2 2 . . 
+. 2 2 4 4 2 2 . 
+. 2 4 4 5 4 2 . 
+. 2 4 5 5 4 2 . 
+3 2 4 5 5 4 2 . 
+. 2 4 5 4 4 2 . 
+. . 2 4 4 2 . . 
+. 2 . 2 2 . 2 . 
+. . . 5 . 4 . . 
+. 2 4 . 5 . . . 
+. . . 5 . 4 . . 
+. . 4 . 4 . 2 . 
+. . . . . 2 . . 
+. . 2 . . . . . 
+. . . . 2 . . . 
+. . . 2 . . . . 
+`;
+            case "image3":
+            case "enemy_cannonRight":return img`
+a a a a b . . . . . . . . . . . 
+b b d d d b . . . . . . . . . . 
+. . b d d d b . . . . . . . . . 
+. b b b b b b b . . . . . . . . 
+b d d d d d d d b b b . . . . . 
+b 2 2 2 2 2 2 d b d d b b . b . 
+b 2 4 4 4 4 2 d d d d d d b 2 b 
+b 2 4 5 5 4 2 d d d d d d d 5 b 
+b 2 4 5 5 4 2 d d d d b b b 5 b 
+b 2 4 4 4 4 2 b b b b a a b 2 b 
+b 2 2 2 2 2 2 a b a a b b . b . 
+b a a a a a a a b b b . . . . . 
+. b b b b b b b . . . . . . . . 
+. . b d d d b . . . . . . . . . 
+b b d d d b . . . . . . . . . . 
+a a a a b . . . . . . . . . . . 
+`;
+            case "image4":
+            case "fireball_right":return img`
+. . . . . . . . . . . 3 . . . . 
+. . . . . . 2 . 2 . 2 2 2 2 2 . 
+. . 2 . 4 . 4 . . 2 4 4 4 4 2 2 
+2 . . . . 5 . 5 2 4 5 5 5 4 4 2 
+. 2 . . 4 . 5 . 2 4 4 5 5 5 4 2 
+. . . 2 . 4 . 4 . 2 4 4 4 4 2 2 
+. . . . 2 . . . 2 . 2 2 2 2 2 . 
+. . . . . . . . . . . . . . . . 
 `;
         }
         return null;
