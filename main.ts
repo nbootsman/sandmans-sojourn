@@ -6,12 +6,16 @@ namespace SpriteKind {
     export const Door = SpriteKind.create()
     export const Cannon = SpriteKind.create()
     export const CannonProjectile = SpriteKind.create()
+    export const Boss = SpriteKind.create()
+    export const BossProjectile = SpriteKind.create()
+    export const SleepingBoss = SpriteKind.create()
 }
 namespace StatusBarKind {
     export const Environment = StatusBarKind.create()
 }
 namespace ConnectionKind {
     export const Door3 = ConnectionKind.create()
+    export const Door4 = ConnectionKind.create()
 }
 sprites.onCreated(SpriteKind.Enemy, function (sprite) {
     if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow4)) {
@@ -73,18 +77,72 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`hourglass-top0`, function (sp
         }
     }
 })
+sprites.onOverlap(SpriteKind.Construct, SpriteKind.CannonProjectile, function (sprite, otherSprite) {
+    otherSprite.destroy(effects.fire, 500)
+})
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile`, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`myTile`)) {
         player_respawnX = player_sprite.x
         player_respawnY = player_sprite.y
     }
 })
+function bossFight () {
+    if (!(boss_Started)) {
+        return
+    }
+    timer.throttle("bossAttack", 2500, function () {
+        if (!(boss_sleeping)) {
+            projectile3 = sprites.createProjectileFromSprite(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `, boss_sprite, 0, 0)
+            projectile3.setFlag(SpriteFlag.AutoDestroy, false)
+            projectile3.setKind(SpriteKind.BossProjectile)
+            animation.runImageAnimation(
+            projectile3,
+            assets.animation`scytheSlash`,
+            100,
+            true
+            )
+            projectile3.follow(player_sprite, 55)
+        }
+    })
+}
 controller.up.onEvent(ControllerButtonEvent.Repeated, function () {
     if (cutscene_isPlaying) {
     	
     } else {
         player_sprite.ay = player_gravity
     }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.BossProjectile, function (sprite, otherSprite) {
+    takeDamage()
+    otherSprite.destroy()
+})
+scene.onOverlapTile(SpriteKind.Player, tiles.util.object15, function (sprite, location) {
+    if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.object15)) {
+        game.showLongText("Clear time: " + convertToText(game.runtime()), DialogLayout.Center)
+        game.over(true)
+    }
+})
+sprites.onCreated(SpriteKind.Boss, function (sprite) {
+    sprite.setImage(assets.image`enemy_boss1`)
+    sprite.setBounceOnWall(true)
+    boss_sprite = sprite
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.CannonProjectile, function (sprite, otherSprite) {
     takeDamage()
@@ -100,7 +158,9 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 scene.onOverlapTile(SpriteKind.Player, tiles.util.door0, function (sprite, location) {
-    if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door0)) {
+    if (doors_Locked) {
+        player_sprite.say("LOCKED", 200)
+    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door0)) {
         player_sprite.say("UP: Enter", 200)
     }
 })
@@ -130,13 +190,20 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
 })
 function startGame () {
     connectRooms()
-    tiles.loadMap(list_Rooms[5])
+    tiles.loadMap(list_Rooms[6])
     upgrade_fillHourglass = true
     upgrade_makeHourglasas = true
     info.setScore(player_sandMax)
     tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
     player_sprite.setPosition(player_sprite.x + tiles.tileWidth(), player_sprite.y)
 }
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Boss, function (sprite, otherSprite) {
+    statusbar2 = statusbars.create(16, 4, StatusBarKind.Magic)
+    statusbar2.attachToSprite(otherSprite, 0, 0)
+    statusbar2.max = duration_sleep / duration_tickRate
+    statusbar2.value = duration_sleep / duration_tickRate
+    putBossToSleep(boss_sprite.y)
+})
 function connectRooms () {
     list_Rooms = [tiles.createMap(tilemap`level_1`)]
     list_Rooms.push(tiles.createMap(tilemap`level_2`))
@@ -144,13 +211,17 @@ function connectRooms () {
     list_Rooms.push(tiles.createMap(tilemap`level_4`))
     list_Rooms.push(tiles.createMap(tilemap`level_5`))
     list_Rooms.push(tiles.createMap(tilemap`level_6`))
-    list_Rooms.push(tiles.createMap(tilemap`level0`))
+    list_Rooms.push(tiles.createMap(tilemap`level_7`))
+    list_Rooms.push(tiles.createMap(tilemap`level_8`))
     tiles.connectMapById(list_Rooms[0], list_Rooms[1], ConnectionKind.Door1)
     tiles.connectMapById(list_Rooms[1], list_Rooms[2], ConnectionKind.Door2)
     tiles.connectMapById(list_Rooms[1], list_Rooms[5], ConnectionKind.Door3)
     tiles.connectMapById(list_Rooms[2], list_Rooms[3], ConnectionKind.Door1)
     tiles.connectMapById(list_Rooms[2], list_Rooms[3], ConnectionKind.Door3)
     tiles.connectMapById(list_Rooms[3], list_Rooms[4], ConnectionKind.Door2)
+    tiles.connectMapById(list_Rooms[5], list_Rooms[6], ConnectionKind.Door1)
+    tiles.connectMapById(list_Rooms[6], list_Rooms[7], ConnectionKind.Door4)
+    list_Rooms.push(tiles.createMap(tilemap`level0`))
 }
 function fillHourglass () {
     if (upgrade_fillHourglass && payCost(cost_fillHourglass)) {
@@ -193,10 +264,22 @@ function fillHourglass () {
         statusbar3.value = duration_hourglass / duration_tickRate
     }
 }
+scene.onOverlapTile(SpriteKind.Player, tiles.util.object5, function (sprite, location) {
+    if (!(doors_trapSprung)) {
+        doors_trapSprung = true
+        doors_Locked = true
+        tiles.coverAllTiles(tiles.util.door0, sprites.dungeon.doorClosedNorth)
+        tiles.coverAllTiles(tiles.util.door2, sprites.dungeon.doorClosedNorth)
+        tiles.coverAllTiles(tiles.util.door8, sprites.dungeon.doorClosedNorth)
+        music.stopAllSounds()
+        music.bigCrash.play()
+    }
+})
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cutscene_isPlaying) {
     	
     } else {
+        music.footstep.loop()
         player_facing = -1
         animation.runImageAnimation(
         player_sprite,
@@ -206,16 +289,12 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
         )
     }
 })
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Door, function (sprite, otherSprite) {
-    if (tiles.locationXY(tiles.locationOfSprite(sprite), tiles.XY.row) == tiles.locationXY(tiles.locationOfSprite(otherSprite), tiles.XY.row) && tiles.locationXY(tiles.locationOfSprite(sprite), tiles.XY.column) == tiles.locationXY(tiles.locationOfSprite(otherSprite), tiles.XY.column)) {
-        player_sprite.say("UP to Enter", 200)
-    }
-})
 controller.right.onEvent(ControllerButtonEvent.Released, function () {
     if (cutscene_isPlaying) {
     	
     } else if (!(controller.left.isPressed())) {
         animation.stopAnimation(animation.AnimationTypes.ImageAnimation, player_sprite)
+        music.footstep.stop()
     }
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`pickup_cosmicFunnel`, function (sprite, location) {
@@ -228,6 +307,7 @@ controller.left.onEvent(ControllerButtonEvent.Released, function () {
     	
     } else if (!(controller.right.isPressed())) {
         animation.stopAnimation(animation.AnimationTypes.ImageAnimation, player_sprite)
+        music.footstep.stop()
     }
 })
 scene.onHitWall(SpriteKind.Construct, function (sprite, location) {
@@ -257,7 +337,10 @@ tiles.onMapLoaded(function (tilemap2) {
     tiles.coverAllTiles(tiles.util.door0, sprites.dungeon.doorOpenNorth)
     tiles.coverAllTiles(tiles.util.door2, sprites.dungeon.doorOpenNorth)
     tiles.coverAllTiles(tiles.util.door8, sprites.dungeon.doorOpenNorth)
-    tiles.replaceAllTiles(tiles.util.object13, assets.tile`sandVortex`)
+    tiles.coverAllTiles(tiles.util.door10, sprites.dungeon.doorLockedNorth)
+    tiles.coverAllTiles(tiles.util.object5, assets.tile`background_purple`)
+    tiles.coverAllTiles(tiles.util.object15, assets.tile`myTile0`)
+    tiles.coverAllTiles(tiles.util.object13, assets.tile`background_purple`)
     tiles.createSpritesOnTiles(tiles.util.object8, SpriteKind.Ammo)
     tiles.coverAllTiles(tiles.util.object8, assets.tile`background_purple`)
     tiles.createSpritesOnTiles(tiles.util.object10, SpriteKind.Food)
@@ -278,6 +361,8 @@ tiles.onMapLoaded(function (tilemap2) {
     tiles.coverAllTiles(tiles.util.arrow13, assets.tile`background_purple`)
     tiles.createSpritesOnTiles(tiles.util.arrow12, SpriteKind.Cannon)
     tiles.coverAllTiles(tiles.util.arrow12, assets.tile`background_purple`)
+    tiles.coverAllTiles(tiles.util.object4, assets.tile`background_purple`)
+    tiles.createSpritesOnTiles(tiles.util.object4, SpriteKind.Boss)
     if (upgrade_fillHourglass) {
         tiles.replaceAllTiles(assets.tile`pickup_cosmicFunnel`, assets.tile`background_purple`)
     }
@@ -333,6 +418,9 @@ function getHasFallen () {
     }
 }
 function upDoorAction () {
+    if (doors_Locked) {
+        return false
+    }
     if (player_sprite.tileKindAt(TileDirection.Center, sprites.dungeon.doorOpenNorth)) {
         game.over(true, effects.confetti)
         return true
@@ -348,6 +436,10 @@ function upDoorAction () {
         tiles.loadConnectedMap(ConnectionKind.Door3)
         tiles.placeOnRandomTile(player_sprite, tiles.util.door8)
         return true
+    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door10)) {
+        tiles.loadConnectedMap(ConnectionKind.Door4)
+        tiles.placeOnRandomTile(player_sprite, tiles.util.object7)
+        return true
     } else {
         return false
     }
@@ -356,6 +448,7 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cutscene_isPlaying) {
     	
     } else {
+        music.footstep.loop()
         player_facing = 1
         animation.runImageAnimation(
         player_sprite,
@@ -376,6 +469,9 @@ tiles.onMapUnloaded(function (tilemap2) {
     tiles.destroySpritesOfKind(SpriteKind.Door)
     tiles.destroySpritesOfKind(SpriteKind.Cannon)
     tiles.destroySpritesOfKind(SpriteKind.CannonProjectile)
+    tiles.destroySpritesOfKind(SpriteKind.BossProjectile)
+    tiles.destroySpritesOfKind(SpriteKind.Boss)
+    tiles.destroySpritesOfKind(SpriteKind.SleepingBoss)
 })
 function updateRespawn () {
     timer.after(50, function () {
@@ -384,7 +480,9 @@ function updateRespawn () {
     })
 }
 scene.onOverlapTile(SpriteKind.Player, tiles.util.door2, function (sprite, location) {
-    if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door2)) {
+    if (doors_Locked) {
+        player_sprite.say("LOCKED", 200)
+    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door2)) {
         player_sprite.say("UP: Enter", 200)
     }
 })
@@ -439,13 +537,31 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
         }
     }
 })
+sprites.onOverlap(SpriteKind.Construct, SpriteKind.BossProjectile, function (sprite, otherSprite) {
+    otherSprite.destroy()
+})
 scene.onOverlapTile(SpriteKind.Player, assets.tile`pickup_hourglassForge`, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`pickup_hourglassForge`)) {
         sprite.say("UP: Pickup", 200)
     }
 })
 info.onLifeZero(function () {
-    game.over(false)
+    if (boss_Started) {
+        boss_Started = false
+        player_sprite.setPosition(player_respawnX, player_respawnY)
+        info.setLife(3)
+        tiles.placeOnRandomTile(boss_sprite, tiles.util.object4)
+        boss_sprite.setVelocity(0, 0)
+    } else {
+        game.over(false)
+    }
+})
+scene.onOverlapTile(SpriteKind.Player, tiles.util.door10, function (sprite, location) {
+    if (doors_Locked) {
+        player_sprite.say("LOCKED", 200)
+    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door10)) {
+        player_sprite.say("UP: Enter", 200)
+    }
 })
 sprites.onCreated(SpriteKind.Cannon, function (sprite) {
     if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow8)) {
@@ -488,9 +604,21 @@ function payCost (cost: number) {
         return false
     }
 }
+sprites.onOverlap(SpriteKind.CannonProjectile, SpriteKind.Boss, function (sprite, otherSprite) {
+    sprite.destroy(effects.smiles, 500)
+})
 scene.onOverlapTile(SpriteKind.Player, tiles.util.door8, function (sprite, location) {
-    if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door8)) {
+    if (doors_Locked) {
+        player_sprite.say("LOCKED", 200)
+    } else if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.door8)) {
         player_sprite.say("UP: Enter", 200)
+    }
+})
+scene.onOverlapTile(SpriteKind.Player, tiles.util.object13, function (sprite, location) {
+    if (!(boss_Started)) {
+        boss_Started = true
+        boss_HP = 3
+        boss_sprite.setVelocity(50, 0)
     }
 })
 statusbars.onZero(StatusBarKind.Energy, function (status) {
@@ -517,6 +645,27 @@ function updateTimers () {
     for (let value6 of status_bar_list) {
         value6.value += -1
     }
+}
+function putBossToSleep (originalY: number) {
+    boss_sleeping = true
+    boss_sprite.setKind(SpriteKind.SleepingBoss)
+    boss_sprite.say("Zzzz", duration_sleep)
+    boss_sprite.fx = 25
+    boss_sprite.ay = 200
+    boss_sprite.setBounceOnWall(false)
+    timer.background(function () {
+        timer.after(duration_sleep, function () {
+            boss_sprite.ay = 0
+            boss_sprite.fx = 0
+            story.spriteMoveToLocation(boss_sprite, boss_sprite.x, originalY, 100)
+            timer.after(500, function () {
+                boss_sprite.setVelocity(50, 0)
+                boss_sprite.setBounceOnWall(true)
+                boss_sprite.setKind(SpriteKind.Boss)
+                boss_sleeping = false
+            })
+        })
+    })
 }
 function getCanJump () {
     if (player_sprite.isHittingTile(CollisionDirection.Bottom)) {
@@ -565,6 +714,21 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     statusbar2.value = duration_sleep / duration_tickRate
     putEnemyToSleep(otherSprite, otherSprite.vx, otherSprite.vy)
 })
+sprites.onOverlap(SpriteKind.CannonProjectile, SpriteKind.SleepingBoss, function (sprite, otherSprite) {
+    timer.throttle("action", 5000, function () {
+        boss_HP += -1
+        if (boss_HP <= 0) {
+            tiles.destroySpritesOfKind(SpriteKind.BossProjectile)
+            sprite.destroy(effects.ashes, 500)
+            otherSprite.destroy(effects.rings, 2000)
+            otherSprite.fx = 0
+            otherSprite.ay = -100
+            boss_Started = false
+            doors_Locked = false
+            tiles.coverAllTiles(tiles.util.door10, sprites.dungeon.doorOpenNorth)
+        }
+    })
+})
 scene.onOverlapTile(SpriteKind.Player, assets.tile`sandVortex`, function (sprite, location) {
     if (sprite.tileKindAt(TileDirection.Center, assets.tile`sandVortex`)) {
         player_sprite.say("UP: Gather", 200)
@@ -604,19 +768,29 @@ function upContextAction () {
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     takeDamage()
 })
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Boss, function (sprite, otherSprite) {
+    takeDamage()
+})
 let upgrade_firstSand = false
-let statusbar2: StatusBarSprite = null
 let statusbar: StatusBarSprite = null
 let hourglass: Sprite = null
 let status_bar_list: StatusBarSprite[] = []
+let boss_HP = 0
 let flipStatusbar: StatusBarSprite = null
 let projectile2: Sprite = null
+let doors_trapSprung = false
 let statusbar3: StatusBarSprite = null
 let tempSprite: Sprite = null
+let statusbar2: StatusBarSprite = null
 let upgrade_makeHourglasas = false
 let list_Rooms: tiles.WorldMap[] = []
 let list: tiles.Location[] = []
 let sand: Sprite = null
+let doors_Locked = false
+let boss_sprite: Sprite = null
+let projectile3: Sprite = null
+let boss_sleeping = false
+let boss_Started = false
 let player_respawnY = 0
 let player_respawnX = 0
 let upgrade_fillHourglass = false
@@ -684,4 +858,5 @@ game.onUpdate(function () {
 game.onUpdateInterval(duration_tickRate, function () {
     updateTimers()
     fireCannons()
+    bossFight()
 })
