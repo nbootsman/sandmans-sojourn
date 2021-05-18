@@ -523,33 +523,18 @@ controller.up.onEvent(ControllerButtonEvent.Released, function () {
 })
 function wakeUpBoss () {
     if (boss_Started && boss_sleeping) {
-        music.beamUp.play()
-        boss_sprite.setKind(SpriteKind.InvincibleBoss)
-        boss_sprite.ay = 0
-        boss_sprite.fx = 0
-        story.spriteMoveToLocation(boss_sprite, boss_sprite.x, boss_flyHeight, 100)
-        timer.after(1000, function () {
+        story.startCutscene(function () {
+            music.beamUp.play()
+            boss_sprite.setKind(SpriteKind.InvincibleBoss)
+            boss_sprite.ay = 0
+            boss_sprite.fx = 0
+            story.spriteMoveToLocation(boss_sprite, boss_sprite.x, boss_flyHeight, 50)
+        })
+        timer.after(1500, function () {
             boss_sprite.setVelocity(50, 0)
             boss_sprite.setBounceOnWall(true)
             animation.stopAnimation(animation.AnimationTypes.ImageAnimation, boss_sprite)
-            boss_sprite.setImage(img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                `)
+            boss_sprite.setImage(assets.image`enemy_boss1`)
             boss_sprite.setKind(SpriteKind.Boss)
             boss_sleeping = false
         })
@@ -582,14 +567,18 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`pickup_hourglassForge`, funct
 })
 info.onLifeZero(function () {
     if (boss_Started) {
+        story.cancelAllCutscenes()
         boss_Started = false
         player_sprite.setPosition(player_respawnX, player_respawnY)
         info.setLife(3)
         info.player2.setLife(3)
         boss_HP = 3
         tiles.placeOnRandomTile(boss_sprite, tiles.util.object4)
+        animation.stopAnimation(animation.AnimationTypes.All, boss_sprite)
         boss_sprite.setImage(assets.image`enemy_boss1`)
         boss_sprite.setVelocity(0, 0)
+        boss_sprite.ay = 0
+        boss_sprite.fx = 0
     } else {
         game.over(false)
     }
@@ -727,7 +716,7 @@ function putBossToSleep () {
     music.zapped.play()
     boss_sprite.setKind(SpriteKind.SleepingBoss)
     boss_sprite.say("Zzzz", duration_sleep)
-    boss_sprite.fx = 25
+    boss_sprite.fx = 30
     boss_sprite.ay = 200
     boss_sprite.setBounceOnWall(false)
     timer.background(function () {
@@ -784,31 +773,37 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     putEnemyToSleep(otherSprite, otherSprite.vx, otherSprite.vy)
 })
 sprites.onOverlap(SpriteKind.CannonProjectile, SpriteKind.SleepingBoss, function (sprite, otherSprite) {
-    timer.throttle("bossHit", 5000, function () {
-        animation.runImageAnimation(
-        boss_sprite,
-        assets.animation`boss_hitFlash`,
-        100,
-        true
-        )
-        music.pewPew.play()
-        boss_HP += -1
-        info.player2.changeLifeBy(-1)
-        droppedHealth = sprites.create(assets.image`pickup_health`, SpriteKind.Food)
-        droppedHealth.setPosition(boss_sprite.x, boss_sprite.y)
-        if (boss_HP <= 0) {
-            tiles.destroySpritesOfKind(SpriteKind.BossProjectile)
-            sprite.destroy(effects.ashes, 500)
-            otherSprite.destroy(effects.rings, 2000)
-            otherSprite.fx = 0
-            otherSprite.ay = -100
-            boss_Started = false
-            doors_Locked = false
-            tiles.coverAllTiles(tiles.util.door10, sprites.dungeon.doorOpenNorth)
-        } else {
-            wakeUpBoss()
-        }
-    })
+    if (boss_Started) {
+        timer.throttle("bossHit", 5000, function () {
+            animation.runImageAnimation(
+            boss_sprite,
+            assets.animation`boss_hitFlash`,
+            100,
+            true
+            )
+            music.pewPew.play()
+            boss_HP += -1
+            info.player2.changeLifeBy(-1)
+            droppedHealth = sprites.create(assets.image`pickup_health`, SpriteKind.Food)
+            droppedHealth.setPosition(boss_sprite.x, boss_sprite.y)
+            if (boss_HP <= 0) {
+                story.cancelAllCutscenes()
+                story.startCutscene(function () {
+                    tiles.destroySpritesOfKind(SpriteKind.BossProjectile)
+                    sprite.destroy(effects.ashes, 500)
+                    otherSprite.destroy(effects.rings, 5000)
+                    otherSprite.fx = 0
+                    otherSprite.ay = -25
+                    boss_Started = false
+                    doors_Locked = false
+                    tiles.coverAllTiles(tiles.util.door10, sprites.dungeon.doorOpenNorth)
+                    music.baDing.play()
+                })
+            } else {
+                wakeUpBoss()
+            }
+        })
+    }
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`sandVortex`, function (sprite, location) {
     if (sprite.tileKindAt(TileDirection.Center, assets.tile`sandVortex`)) {
