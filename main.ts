@@ -82,12 +82,6 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`hourglass-top0`, function (sp
 sprites.onOverlap(SpriteKind.Construct, SpriteKind.CannonProjectile, function (sprite, otherSprite) {
     otherSprite.destroy(effects.fire, 500)
 })
-scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile`, function (sprite, location) {
-    if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`myTile`)) {
-        player_respawnX = player_sprite.x
-        player_respawnY = player_sprite.y
-    }
-})
 function bossFight () {
     if (!(boss_Started)) {
         return
@@ -335,6 +329,7 @@ sprites.onOverlap(SpriteKind.SleepingEnemy, SpriteKind.CannonProjectile, functio
 })
 tiles.onMapLoaded(function (tilemap2) {
     tiles.replaceAllTiles(tiles.util.object7, assets.tile`background_purple`)
+    tiles.replaceAllTiles(assets.tile`checkpoint_on`, assets.tile`checkpoint`)
     tiles.coverAllTiles(tiles.util.door0, sprites.dungeon.doorOpenNorth)
     tiles.coverAllTiles(tiles.util.door2, sprites.dungeon.doorOpenNorth)
     tiles.coverAllTiles(tiles.util.door8, sprites.dungeon.doorOpenNorth)
@@ -639,6 +634,14 @@ sprites.onCreated(SpriteKind.Cannon, function (sprite) {
         sprite.image.flipX()
     }
 })
+scene.onOverlapTile(SpriteKind.Player, assets.tile`checkpoint`, function (sprite, location) {
+    if (player_sprite.tileKindAt(TileDirection.Center, assets.tile`checkpoint`)) {
+        tiles.replaceAllTiles(assets.tile`checkpoint_on`, assets.tile`checkpoint`)
+        tiles.setTileAt(location, assets.tile`checkpoint_on`)
+        player_respawnX = player_sprite.x
+        player_respawnY = player_sprite.y
+    }
+})
 function putEnemyToSleep (enemySprite: Sprite, orignalVx: number, originalVy: number) {
     enemySprite.setKind(SpriteKind.SleepingEnemy)
     enemySprite.setVelocity(0, 0)
@@ -857,6 +860,8 @@ let boss_HP = 0
 let flipStatusbar: StatusBarSprite = null
 let boss_flyHeight = 0
 let projectile2: Sprite = null
+let player_respawnY = 0
+let player_respawnX = 0
 let upgrade_makeHourglasas = false
 let doors_trapSprung = false
 let statusbar3: StatusBarSprite = null
@@ -870,8 +875,6 @@ let boss_sprite: Sprite = null
 let projectile3: Sprite = null
 let boss_sleeping = false
 let boss_Started = false
-let player_respawnY = 0
-let player_respawnX = 0
 let upgrade_fillHourglass = false
 let projectile: Sprite = null
 let player_canJump = false
@@ -908,22 +911,22 @@ player_lifeMax = 3
 info.setScore(0)
 info.setLife(player_lifeMax)
 player_sprite = sprites.create(img`
-    . . . . . . . . . . . . . . . . 
-    . . . . . f f f f f f . . . . . 
-    . . . f f e e e e f 2 f . . . . 
-    . . f f e e e e f 2 2 2 f . . . 
-    . . f e e e f f e e e e f . . . 
-    . . f f f f e e 2 2 2 2 e f . . 
-    . . f e 2 2 2 f f f f e 2 f . . 
-    . f f f f f f f e e e f f f . . 
-    . f f e 4 4 e b f 4 4 e e f . . 
-    . f e e 4 d 4 1 f d d e f . . . 
-    . . f e e e e e d d d f . . . . 
-    . . . . f 4 d d e 4 e f . . . . 
-    . . . . f e d d e 2 2 f . . . . 
-    . . . f f f e e f 5 5 f f . . . 
-    . . . f f f f f f f f f f . . . 
-    . . . . f f . . . f f f . . . . 
+    . . . . . . f f f f f f . . . . 
+    . . . . f f 4 4 4 4 e 4 f . . . 
+    . . . f f 4 4 4 4 e 4 4 4 f . . 
+    . . . f 4 4 4 e e 4 4 4 4 f . . 
+    . . . f e e e 4 4 4 4 4 4 4 f . 
+    . . . f 4 4 4 4 f f f f 4 4 f . 
+    . . f 4 4 e f f f e e e f f f . 
+    . . f 4 e 4 4 e b 5 4 4 e e f . 
+    . . f e e 4 d 4 1 f d d e f . . 
+    . . . f e e e 4 d d d b f . . . 
+    . . . . f f 5 5 4 4 1 1 f . . . 
+    . . . . f 4 d d 5 4 4 1 f . . . 
+    . . . . f 5 d d 5 e 4 4 f . . . 
+    . . . . f f 5 5 4 4 e 4 f . . . 
+    . . . . f 4 e 4 f 4 4 e f . . . 
+    . . . f f 4 e 4 e 4 4 e f f . . 
     `, SpriteKind.Player)
 startGame()
 player_gravity = 300
