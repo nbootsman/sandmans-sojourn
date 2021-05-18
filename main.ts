@@ -9,6 +9,8 @@ namespace SpriteKind {
     export const Boss = SpriteKind.create()
     export const BossProjectile = SpriteKind.create()
     export const SleepingBoss = SpriteKind.create()
+    export const InvincibleBoss = SpriteKind.create()
+    export const Destroyed = SpriteKind.create()
 }
 namespace StatusBarKind {
     export const Environment = StatusBarKind.create()
@@ -112,13 +114,14 @@ function bossFight () {
                 `, boss_sprite, 0, 0)
             projectile3.setFlag(SpriteFlag.AutoDestroy, false)
             projectile3.setKind(SpriteKind.BossProjectile)
+            music.spooky.play()
             animation.runImageAnimation(
             projectile3,
             assets.animation`scytheSlash`,
             100,
             true
             )
-            projectile3.follow(player_sprite, 50)
+            scytheFlight(projectile3)
         }
     })
 }
@@ -130,12 +133,13 @@ controller.up.onEvent(ControllerButtonEvent.Repeated, function () {
     }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.BossProjectile, function (sprite, otherSprite) {
-    takeDamage()
     otherSprite.destroy()
+    otherSprite.setKind(SpriteKind.Destroyed)
+    takeDamage()
 })
 scene.onOverlapTile(SpriteKind.Player, tiles.util.object15, function (sprite, location) {
     if (player_sprite.tileKindAt(TileDirection.Center, tiles.util.object15)) {
-        game.showLongText("Clear time: " + convertToText(game.runtime()), DialogLayout.Center)
+        game.showLongText("Clear time: " + convertToText(game.runtime() / 1000) + "s", DialogLayout.Center)
         game.over(true)
     }
 })
@@ -190,7 +194,7 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
 })
 function startGame () {
     connectRooms()
-    tiles.loadMap(list_Rooms[5])
+    tiles.loadMap(list_Rooms[6])
     upgrade_fillHourglass = true
     upgrade_makeHourglasas = true
     info.setScore(player_sandMax)
@@ -202,7 +206,7 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Boss, function (sprite, othe
     statusbar2.attachToSprite(otherSprite, 0, 0)
     statusbar2.max = duration_sleep / duration_tickRate
     statusbar2.value = duration_sleep / duration_tickRate
-    putBossToSleep(boss_sprite.y)
+    putBossToSleep()
 })
 function connectRooms () {
     list_Rooms = [tiles.createMap(tilemap`level_1`)]
@@ -520,6 +524,23 @@ controller.up.onEvent(ControllerButtonEvent.Released, function () {
     }
     player_sprite.ay = player_gravity
 })
+function wakeUpBoss () {
+    if (boss_Started && boss_sleeping) {
+        music.beamUp.play()
+        boss_sprite.setKind(SpriteKind.InvincibleBoss)
+        boss_sprite.ay = 0
+        boss_sprite.fx = 0
+        story.spriteMoveToLocation(boss_sprite, boss_sprite.x, boss_flyHeight, 100)
+        timer.after(1000, function () {
+            boss_sprite.setVelocity(50, 0)
+            boss_sprite.setBounceOnWall(true)
+            animation.stopAnimation(animation.AnimationTypes.ImageAnimation, boss_sprite)
+            boss_sprite.setImage(assets.image`enemy_boss1`)
+            boss_sprite.setKind(SpriteKind.Boss)
+            boss_sleeping = false
+        })
+    }
+}
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cutscene_isPlaying) {
     	
@@ -550,7 +571,10 @@ info.onLifeZero(function () {
         boss_Started = false
         player_sprite.setPosition(player_respawnX, player_respawnY)
         info.setLife(3)
+        info.player2.setLife(3)
+        boss_HP = 3
         tiles.placeOnRandomTile(boss_sprite, tiles.util.object4)
+        boss_sprite.setImage(assets.image`enemy_boss1`)
         boss_sprite.setVelocity(0, 0)
     } else {
         game.over(false)
@@ -563,6 +587,40 @@ scene.onOverlapTile(SpriteKind.Player, tiles.util.door10, function (sprite, loca
         player_sprite.say("UP: Enter", 200)
     }
 })
+function scytheFlight (scythe: Sprite) {
+    scythe.follow(player_sprite, 50)
+    timer.after(1250, function () {
+        if (scythe.kind() != SpriteKind.Destroyed) {
+            projectile4 = sprites.createProjectileFromSprite(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `, scythe, scythe.vx, scythe.vy)
+            scythe.destroy()
+            projectile4.setFlag(SpriteFlag.AutoDestroy, false)
+            projectile4.setKind(SpriteKind.BossProjectile)
+            animation.runImageAnimation(
+            projectile4,
+            assets.animation`scytheSlash`,
+            100,
+            true
+            )
+        }
+    })
+}
 sprites.onCreated(SpriteKind.Cannon, function (sprite) {
     if (tiles.tileIs(tiles.locationOfSprite(sprite), tiles.util.arrow8)) {
         sprite.setImage(assets.image`enemy_cannonUp`)
@@ -618,7 +676,9 @@ scene.onOverlapTile(SpriteKind.Player, tiles.util.object13, function (sprite, lo
     if (!(boss_Started)) {
         boss_Started = true
         boss_HP = 3
+        info.player2.setLife(3)
         boss_sprite.setVelocity(50, 0)
+        boss_flyHeight = boss_sprite.y
     }
 })
 statusbars.onZero(StatusBarKind.Energy, function (status) {
@@ -646,24 +706,17 @@ function updateTimers () {
         value6.value += -1
     }
 }
-function putBossToSleep (originalY: number) {
+function putBossToSleep () {
     boss_sleeping = true
+    music.zapped.play()
     boss_sprite.setKind(SpriteKind.SleepingBoss)
     boss_sprite.say("Zzzz", duration_sleep)
-    boss_sprite.fx = 40
+    boss_sprite.fx = 25
     boss_sprite.ay = 200
     boss_sprite.setBounceOnWall(false)
     timer.background(function () {
         timer.after(duration_sleep, function () {
-            boss_sprite.ay = 0
-            boss_sprite.fx = 0
-            story.spriteMoveToLocation(boss_sprite, boss_sprite.x, originalY, 100)
-            timer.after(500, function () {
-                boss_sprite.setVelocity(50, 0)
-                boss_sprite.setBounceOnWall(true)
-                boss_sprite.setKind(SpriteKind.Boss)
-                boss_sleeping = false
-            })
+            wakeUpBoss()
         })
     })
 }
@@ -715,8 +768,18 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     putEnemyToSleep(otherSprite, otherSprite.vx, otherSprite.vy)
 })
 sprites.onOverlap(SpriteKind.CannonProjectile, SpriteKind.SleepingBoss, function (sprite, otherSprite) {
-    timer.throttle("bossHit", 7500, function () {
+    timer.throttle("bossHit", 5000, function () {
+        animation.runImageAnimation(
+        boss_sprite,
+        assets.animation`boss_hitFlash`,
+        100,
+        true
+        )
+        music.pewPew.play()
         boss_HP += -1
+        info.player2.changeLifeBy(-1)
+        droppedHealth = sprites.create(assets.image`pickup_health`, SpriteKind.Food)
+        droppedHealth.setPosition(boss_sprite.x, boss_sprite.y)
         if (boss_HP <= 0) {
             tiles.destroySpritesOfKind(SpriteKind.BossProjectile)
             sprite.destroy(effects.ashes, 500)
@@ -726,6 +789,8 @@ sprites.onOverlap(SpriteKind.CannonProjectile, SpriteKind.SleepingBoss, function
             boss_Started = false
             doors_Locked = false
             tiles.coverAllTiles(tiles.util.door10, sprites.dungeon.doorOpenNorth)
+        } else {
+            wakeUpBoss()
         }
     })
 })
@@ -772,11 +837,14 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Boss, function (sprite, otherSpr
     takeDamage()
 })
 let upgrade_firstSand = false
+let droppedHealth: Sprite = null
 let statusbar: StatusBarSprite = null
 let hourglass: Sprite = null
 let status_bar_list: StatusBarSprite[] = []
+let projectile4: Sprite = null
 let boss_HP = 0
 let flipStatusbar: StatusBarSprite = null
+let boss_flyHeight = 0
 let projectile2: Sprite = null
 let doors_trapSprung = false
 let statusbar3: StatusBarSprite = null
@@ -818,7 +886,7 @@ cutscene_isPlaying = false
 scene.setBackgroundColor(12)
 player_facing = 1
 duration_hourglass = 5000
-duration_sleep = 2500
+duration_sleep = 3000
 duration_damageImmunity = 1000
 duration_tickRate = 500
 cost_throwSand = 1
