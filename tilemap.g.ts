@@ -263,13 +263,13 @@ namespace myTiles {
 22222222222222222222.2..2..2.222
 `, [myTiles.transparency16,sprites.dungeon.darkGroundCenter,tiles.util.door8,sprites.dungeon.floorLight3,sprites.dungeon.floorLightMoss,sprites.dungeon.floorLight4,tiles.util.arrow8,tiles.util.object7,tiles.util.arrow12,myTiles.tile5,myTiles.tile6,myTiles.tile7,myTiles.tile10,sprites.dungeon.floorLight0,tiles.util.arrow0,tiles.util.arrow9,sprites.dungeon.floorLight2,tiles.util.arrow4,sprites.dungeon.darkGroundNorthWest0,tiles.util.door0,tiles.util.arrow13,myTiles.tile2,tiles.util.object10,sprites.dungeon.floorLight1,sprites.dungeon.darkGroundSouthEast1,sprites.dungeon.darkGroundNorth,sprites.dungeon.darkGroundNorthEast0,sprites.dungeon.darkGroundEast,sprites.dungeon.darkGroundWest,sprites.dungeon.darkGroundSouth,sprites.dungeon.darkGroundNorthWest1,sprites.dungeon.darkGroundSouthEast0,sprites.dungeon.darkGroundSouthWest0,sprites.dungeon.darkGroundNorthEast1,sprites.dungeon.floorDark1], TileScale.Sixteen);
             case "level_7":
-            case "level8":return tiles.createTilemap(hex`1e000a000b0b0b0b0b0b0b0b0b0b0b0b0b0b0b13170d0b13170d0b13170d0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b09000f0b09000f0b09000f0b0b0b0b0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c12180c0c0c180c0c12180c0c0d0b0b0000000006000000000000000000000000000000140000000000000f0b0b0000000006000000000000000000000000000000140000001100000f0b0b0000000006000000000000000007080000000000140000000000000f0b0b000000000600000000000000070a090000000000140000000000000f0b0b0000000006000000000000070a1312160000000014000000000016100d0b00030400060001050500070a0b09011500000000140000000000150e0f0b020202020202020202020202020202020202020202020202020202020a0b`, img`
+            case "level8":return tiles.createTilemap(hex`1e000a000b0b0b0b0b0b0b0b0b0b0b0b0b0b0b13170d0b13170d0b13170d0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b09000f0b09000f0b09000f0b0b0b0b0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c12180c0c0c180c0c12180c0c0d0b0b0000000006000000000000000000000000000000140000000000000f0b0b000000000600000000000000000000000000000014000000110000100d0b0000000006000000000000000007080000000000140000000000000e0f0b000000000600000000000000070a09000000000014000000000000070a0b0000000006000000000000070a1312160000000014000000000016100d0b00030400060001050500070a0b0901150000000014000000000015010f0b020202020202020202020202020202020202020202020202020202020a0b`, img`
 . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2 . 
 . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2 . 
 . . 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 . 
 . . . . . . . . . . . . . . . . . . . . . . . . . . . 2 2 . 
 . . . . . . . . . . . . . . . . . . . . . . . . . . . 2 2 . 
-. . . . . . . . . . . . . 2 2 . . . . . . . . . . . . 2 2 . 
+. . . . . . . . . . . . . 2 2 . . . . . . . . . . . . . 2 . 
 . . . . . . . . . . . . 2 2 2 . . . . . . . . . . . . 2 2 . 
 . . . . . . . . . . . 2 2 2 2 . . . . . . . . . . . . 2 2 . 
 . . . . . . . . . . 2 2 2 2 . . . . . . . . . . . . . . 2 . 

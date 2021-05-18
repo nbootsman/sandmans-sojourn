@@ -535,7 +535,24 @@ function wakeUpBoss () {
             boss_sprite.setVelocity(50, 0)
             boss_sprite.setBounceOnWall(true)
             animation.stopAnimation(animation.AnimationTypes.ImageAnimation, boss_sprite)
-            boss_sprite.setImage(assets.image`enemy_boss1`)
+            boss_sprite.setImage(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `)
             boss_sprite.setKind(SpriteKind.Boss)
             boss_sleeping = false
         })
@@ -589,36 +606,38 @@ scene.onOverlapTile(SpriteKind.Player, tiles.util.door10, function (sprite, loca
 })
 function scytheFlight (scythe: Sprite) {
     scythe.follow(player_sprite, 50)
-    timer.after(1250, function () {
-        if (scythe.kind() != SpriteKind.Destroyed) {
-            projectile4 = sprites.createProjectileFromSprite(img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                `, scythe, scythe.vx, scythe.vy)
-            scythe.destroy()
-            projectile4.setFlag(SpriteFlag.AutoDestroy, false)
-            projectile4.setKind(SpriteKind.BossProjectile)
-            animation.runImageAnimation(
-            projectile4,
-            assets.animation`scytheSlash`,
-            100,
-            true
-            )
-        }
+    timer.background(function () {
+        timer.after(1250, function () {
+            if (!(scythe.vx == 0 && scythe.vy == 0)) {
+                projectile4 = sprites.createProjectileFromSprite(img`
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    `, scythe, scythe.vx, scythe.vy)
+                scythe.destroy()
+                projectile4.setFlag(SpriteFlag.AutoDestroy, false)
+                projectile4.setKind(SpriteKind.BossProjectile)
+                animation.runImageAnimation(
+                projectile4,
+                assets.animation`scytheSlash`,
+                100,
+                true
+                )
+            }
+        })
     })
 }
 sprites.onCreated(SpriteKind.Cannon, function (sprite) {
