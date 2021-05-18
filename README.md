@@ -1,4 +1,12 @@
- 
+The sandman has been trapped in a dream turned nightmare and if he cannot escape, the dreamer may never awake. 
+
+↔: Move
+
+⬆: Jump
+
+🅰/Space: Use the Sands of Time to alter the dream
+
+🅱/Enter: Throw Sands of Sleep to render enemies temporarily harmless
 
 
 > Open this page at [https://nbootsman.github.io/sandmans-sojourn/](https://nbootsman.github.io/sandmans-sojourn/)
