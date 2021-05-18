@@ -118,7 +118,7 @@ function bossFight () {
             100,
             true
             )
-            projectile3.follow(player_sprite, 55)
+            projectile3.follow(player_sprite, 50)
         }
     })
 }
@@ -190,7 +190,7 @@ statusbars.onZero(StatusBarKind.Environment, function (status) {
 })
 function startGame () {
     connectRooms()
-    tiles.loadMap(list_Rooms[6])
+    tiles.loadMap(list_Rooms[5])
     upgrade_fillHourglass = true
     upgrade_makeHourglasas = true
     info.setScore(player_sandMax)
@@ -650,7 +650,7 @@ function putBossToSleep (originalY: number) {
     boss_sleeping = true
     boss_sprite.setKind(SpriteKind.SleepingBoss)
     boss_sprite.say("Zzzz", duration_sleep)
-    boss_sprite.fx = 25
+    boss_sprite.fx = 40
     boss_sprite.ay = 200
     boss_sprite.setBounceOnWall(false)
     timer.background(function () {
@@ -715,7 +715,7 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     putEnemyToSleep(otherSprite, otherSprite.vx, otherSprite.vy)
 })
 sprites.onOverlap(SpriteKind.CannonProjectile, SpriteKind.SleepingBoss, function (sprite, otherSprite) {
-    timer.throttle("action", 5000, function () {
+    timer.throttle("bossHit", 7500, function () {
         boss_HP += -1
         if (boss_HP <= 0) {
             tiles.destroySpritesOfKind(SpriteKind.BossProjectile)
