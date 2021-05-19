@@ -40,6 +40,7 @@ sprites.onCreated(SpriteKind.Enemy, function (sprite) {
 })
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     timer.throttle("upAction", 100, function () {
+        music.footstep.stop()
         if (cutscene_isPlaying) {
         	
         } else if (upContextAction()) {
