@@ -259,6 +259,9 @@ function fillHourglass () {
         statusbar3.value = duration_hourglass / duration_tickRate
     }
 }
+controller.right.onEvent(ControllerButtonEvent.Repeated, function () {
+    music.footstep.playUntilDone()
+})
 scene.onOverlapTile(SpriteKind.Player, tiles.util.object5, function (sprite, location) {
     if (!(doors_trapSprung)) {
         doors_trapSprung = true
@@ -274,7 +277,6 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cutscene_isPlaying) {
     	
     } else {
-        music.footstep.loop()
         player_facing = -1
         animation.runImageAnimation(
         player_sprite,
@@ -283,6 +285,8 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
         true
         )
     }
+    controller.configureRepeatEventDefaults(250, 250)
+    music.footstep.playUntilDone()
 })
 controller.right.onEvent(ControllerButtonEvent.Released, function () {
     if (cutscene_isPlaying) {
@@ -444,7 +448,6 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cutscene_isPlaying) {
     	
     } else {
-        music.footstep.loop()
         player_facing = 1
         animation.runImageAnimation(
         player_sprite,
@@ -452,6 +455,8 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
         200,
         true
         )
+        controller.configureRepeatEventDefaults(250, 250)
+        music.footstep.playUntilDone()
     }
 })
 tiles.onMapUnloaded(function (tilemap2) {
@@ -846,6 +851,9 @@ function upContextAction () {
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     takeDamage()
+})
+controller.left.onEvent(ControllerButtonEvent.Repeated, function () {
+    music.footstep.playUntilDone()
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Boss, function (sprite, otherSprite) {
     takeDamage()
